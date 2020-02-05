@@ -9,10 +9,10 @@ import Map from './screens/Map';
 const RootStack = createStackNavigator(
   {
     // Login: {screen: Login},
+    Login: {screen: Login},
     Map: {screen: Map},
 
     SignUp: {screen: SignUp},
-    Login: {screen: Login},
     // CommentsPage:{screen: CommentsPage},
     // UsersPage:{screen: UsersPage},
   },

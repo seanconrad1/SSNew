@@ -83,7 +83,7 @@ const SignUp = props => {
         autoFocus
         keyboardType="default"
         onChangeText={u => setName(u)}
-        leftIconContainerStyle={{paddingRight: 8}}
+        leftIconContainerStyle={styles.iconPadding}
       />
 
       <Input
@@ -96,7 +96,7 @@ const SignUp = props => {
         autoFocus
         keyboardType="default"
         onChangeText={em => setEmail(em)}
-        leftIconContainerStyle={{paddingRight: 8}}
+        leftIconContainerStyle={styles.iconPadding}
       />
 
       <Input
@@ -108,7 +108,7 @@ const SignUp = props => {
         secureTextEntry
         leftIcon={<Icon name="lock" size={24} color="black" />}
         onChangeText={p => setPassword(p)}
-        leftIconContainerStyle={{paddingRight: 8}}
+        leftIconContainerStyle={styles.iconPadding}
       />
 
       <Input
@@ -120,7 +120,7 @@ const SignUp = props => {
         secureTextEntry
         leftIcon={<Icon name="lock" size={24} color="black" />}
         onChangeText={confirm => setConfirmPassword(confirm)}
-        leftIconContainerStyle={{paddingRight: 8}}
+        leftIconContainerStyle={styles.iconPadding}
       />
 
       <Button
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   header: {
-    // fontFamily: 'Lobster',
+    fontFamily: 'Lobster',
     fontSize: 50,
     fontWeight: 'bold',
     // marginBottom: 80
@@ -160,6 +160,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     borderRadius: 20,
   },
+  iconPadding: {paddingRight: 8},
 });
 
 export default SignUp;

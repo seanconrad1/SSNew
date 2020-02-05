@@ -84,7 +84,7 @@ const Login = props => {
       </View>
 
       <Input
-        leftIconContainerStyle={{paddingRight: 8}}
+        leftIconContainerStyle={styles.iconPadding}
         placeholder="Username"
         leftIcon={<Icon name="user" size={24} color="black" />}
         clearButtonMode="never"
@@ -96,7 +96,7 @@ const Login = props => {
       />
 
       <Input
-        leftIconContainerStyle={{paddingRight: 10}}
+        leftIconContainerStyle={styles.iconPadding}
         returnKeyType="go"
         onSubmitEditing={onSubmit}
         placeholder="Password"
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(40, 44, 52)',
   },
   header: {
-    fontFamily: 'Times New Roman',
+    fontFamily: 'Lobster-Regular',
     fontWeight: 'bold',
     marginBottom: hp('5%'),
   },
@@ -158,6 +158,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     borderRadius: wp('20%'),
   },
+  iconPadding: {paddingRight: 8},
 });
 
 export default Login;

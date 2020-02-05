@@ -20,6 +20,7 @@
 		8B050301D89C2653CD5E09B5 /* libPods-SkateSense3-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DBB8AF3130BFB518FB62978E /* libPods-SkateSense3-tvOSTests.a */; };
 		FDECE2796B4F8B853C9B77DD /* libPods-SkateSense3Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0144DD7732053AE2472C98 /* libPods-SkateSense3Tests.a */; };
 		FF7D862F511C807D1F87C0CA /* libPods-SkateSense3-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 147B2514EDBDD2B095E0CC79 /* libPods-SkateSense3-tvOS.a */; };
+		532741E391E24715B022BAC7 /* Lobster-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 871602BA83BD40AA957C30E1 /* Lobster-Regular.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,6 +84,7 @@
 		F5E86B36BD694599B8C90FC8 /* AntDesign.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = AntDesign.ttf; path = "../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf"; sourceTree = "<group>"; };
 		FC265A4D9BB54285ADD30493 /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
 		FD54A2C90462D8E3F690F917 /* Pods-SkateSense3Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SkateSense3Tests.release.xcconfig"; path = "Target Support Files/Pods-SkateSense3Tests/Pods-SkateSense3Tests.release.xcconfig"; sourceTree = "<group>"; };
+		871602BA83BD40AA957C30E1 /* Lobster-Regular.ttf */ = {isa = PBXFileReference; name = "Lobster-Regular.ttf"; path = "../assets/fonts/Lobster-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -233,6 +235,7 @@
 				876AB85DC06E428D9808551C /* Octicons.ttf */,
 				05F7AC279DB94261B3B5F09C /* SimpleLineIcons.ttf */,
 				B24F645C4B664DC28E62C8CE /* Zocial.ttf */,
+				871602BA83BD40AA957C30E1 /* Lobster-Regular.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -379,6 +382,7 @@
 			files = (
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
+				532741E391E24715B022BAC7 /* Lobster-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
