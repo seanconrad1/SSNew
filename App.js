@@ -1,49 +1,93 @@
-import React from 'react';
+import React, {useContext} from 'react';
 // import {GRAPHQL_URL} from 'react-native-dotenv';
 
 //Components
 //Apollo
-import {Text} from 'react-native';
+import {AsyncStorage} from 'react-native';
 import {ApolloClient} from 'apollo-client';
 import {ApolloProvider} from '@apollo/react-hooks';
+import {setContext} from 'apollo-link-context';
 import {InMemoryCache} from 'apollo-cache-inmemory';
+import {onError} from 'apollo-link-error';
 import {HttpLink} from 'apollo-link-http';
 import unfetch from 'unfetch';
 import Navigation from './src/navigation';
+import {StateProvider, store} from './store';
 
 // Create the client as outlined in the setup guide
 
 const cache = new InMemoryCache();
-const link = new HttpLink({
+const httpLink = new HttpLink({
   uri: 'http://localhost:4000/graphql',
   fetch: unfetch,
 });
 
-const client = new ApolloClient({
-  cache,
-  link,
+const getAuthToken = async () => {
+  try {
+    const value = await AsyncStorage.getItem('AUTH_TOKEN');
+    if (value !== null) {
+      return value;
+    }
+  } catch (error) {
+    return error;
+  }
+};
+
+// middleware for requests
+const authLink = setContext(async (req, previousContext) => {
+  // get the authentication token from local storage if it exists
+  const jwt = await getAuthToken();
+  console.log('WHAT IS JWT: ', jwt);
+  if (jwt) {
+    return {
+      headers: {
+        authorization: `Bearer ${jwt}`,
+      },
+    };
+  }
+  return previousContext;
 });
 
-const setUser = newUser => {
-  user = newUser;
-};
+const errorLink = onError(async ({graphQLErrors, networkError}) => {
+  let shouldLogout = false;
+  if (graphQLErrors) {
+    graphQLErrors.forEach(({message, locations, path}) => {
+      if (message === 'Unauthorized') {
+        shouldLogout = true;
+      }
+    });
 
-let user = {
-  name: '',
-  email: '',
-  token: '',
-  authorized: false,
-  setUser,
-};
+    if (shouldLogout) {
+      try {
+        await AsyncStorage.setItem('AUTH_TOKEN', '');
+      } catch (e) {
+        return e;
+      }
+    }
+  }
+  if (networkError) {
+    if (networkError.statusCode === 401) {
+      try {
+        await AsyncStorage.setItem('AUTH_TOKEN', '');
+      } catch (e) {
+        return e;
+      }
+    }
+  }
+});
 
-export const UserContext = React.createContext(null);
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache,
+  errorLink,
+});
 
 const App = () => {
   return (
     <ApolloProvider client={client}>
-      <UserContext.Provider value={user}>
+      <StateProvider>
         <Navigation />
-      </UserContext.Provider>
+      </StateProvider>
     </ApolloProvider>
   );
 };

@@ -1,16 +1,16 @@
 import React from 'react';
-import {
-  createAppContainer,
-  createDrawerNavigator,
-  DrawerItems,
-} from 'react-navigation';
+import {createAppContainer, DrawerItems} from 'react-navigation';
+import {createDrawerNavigator} from 'react-navigation-drawer';
 import {createStackNavigator} from 'react-navigation-stack';
 import SignUp from './screens/SignUp';
 import Login from './screens/Login';
+import Map from './screens/Map';
 
 const RootStack = createStackNavigator(
   {
     // Login: {screen: Login},
+    Map: {screen: Map},
+
     SignUp: {screen: SignUp},
     Login: {screen: Login},
     // CommentsPage:{screen: CommentsPage},
@@ -25,27 +25,51 @@ const RootStack = createStackNavigator(
   },
 );
 
-// const HomeNavigationDrawer = createDrawerNavigator({
-//   RootStack: {screen: RootStack},
-// });
+const Drawer = createStackNavigator(
+  {
+    Map: {screen: Map},
+  },
+  {
+    headerMode: 'none',
+    navigationOptions: {
+      headerVisible: false,
+    },
+  },
+  {
+    initialRouteName: 'Map',
+  },
+);
 
-// const PrimaryNav = createStackNavigator(
-//   {
-//     HomeNavigationDrawer: {screen: HomeNavigationDrawer},
-//   },
-//   {
-//     // Default config for all screens
-//     headerMode: 'none',
-//     title: 'Main',
-//     initialRouteName: 'HomeNavigationDrawer',
-//     gesturesEnabled: false,
-//   },
-// );
+const HomeNavigationDrawer = createDrawerNavigator(
+  {
+    RootStack: {screen: RootStack},
+    Drawer: {screen: Drawer},
+  },
+  {
+    // contentComponent: SideMenu,
+    drawerOpenRoute: 'DrawerOpen',
+    drawerCloseRoute: 'DrawerClose',
+    drawerToggleRoute: 'DrawerToggle',
+    drawerWidth: 250,
+  },
+);
 
-const AppNavigatorContainer = createAppContainer(RootStack);
+const PrimaryNav = createStackNavigator(
+  {
+    HomeNavigationDrawer: {screen: HomeNavigationDrawer},
+  },
+  {
+    // Default config for all screens
+    headerMode: 'none',
+    title: 'Main',
+    initialRouteName: 'HomeNavigationDrawer',
+    gesturesEnabled: false,
+  },
+);
+
+const AppNavigatorContainer = createAppContainer(PrimaryNav);
 
 const Navigation = props => {
-  console.log('nav line 81: ', props);
   return <AppNavigatorContainer>{props.children}</AppNavigatorContainer>;
 };
 

@@ -1,18 +1,16 @@
-import React, {useReducer, useState, useEffect, useContext} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
-  Text,
   StyleSheet,
   View,
   KeyboardAvoidingView,
   Animated,
+  AsyncStorage,
 } from 'react-native';
-import {Input, Button, ThemeProvider} from 'react-native-elements';
+import {Input, Button} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import CREATE_USER from '../graphql/mutations/newUserMutation';
 import {useMutation} from '@apollo/react-hooks';
-import {UserContext} from '../../App';
-
-// import { withNavigation } from 'react-navigation';
+import {store} from '../../store';
 
 const SignUp = props => {
   const [name, setName] = useState('');
@@ -20,17 +18,16 @@ const SignUp = props => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
-
-  const user = useContext(UserContext);
-
-  console.log('WHAT DIS', user);
+  const globalState = useContext(store);
+  const {dispatch} = globalState;
 
   const [
     createUser,
     {loading: mutationLoading, error: mutationError},
   ] = useMutation(CREATE_USER);
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
+    let data;
     const obj = {
       userInput: {
         email,
@@ -38,25 +35,37 @@ const SignUp = props => {
         password,
       },
     };
-    // createUser({variables: obj});
 
-    user.setUser({
-      name: 'Sean',
-      email: 'seanrad@gmail.com',
-      token: '123124',
-      authorized: true,
-      setUser: user.setUser,
+    try {
+      data = await createUser({variables: obj});
+    } catch (e) {
+      setError(e);
+    }
+
+    dispatch({
+      type: 'set user',
+      obj: {
+        name: data.data.createUser.name,
+        email: data.data.createUser.email,
+        user_id: data.data.createUser.user_id,
+        token: data.data.createUser.token,
+        authorized: true,
+      },
     });
 
-    console.log(user);
-
-    // setEmail('');
-    // setPassword('');
-    // setName('');
-    // setConfirmPassword('');
+    try {
+      await AsyncStorage.setItem('AUTH_TOKEN', data.data.createUser.token);
+    } catch (e) {
+      return e;
+    }
+    setEmail('');
+    setPassword('');
+    setName('');
+    setConfirmPassword('');
+    if (!error) {
+      props.navigation.navigate('Map');
+    }
   };
-
-  console.log('ERROR', mutationError);
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">

@@ -1,4 +1,4 @@
-import React, {useReducer, useState, useEffect, useContext} from 'react';
+import React, {useReducer, useState, useEffect} from 'react';
 import {
   Text,
   StyleSheet,
@@ -29,8 +29,6 @@ const Login = props => {
   const [fontSizeBig, setFontSizeBig] = useState(new Animated.Value(hp('8')));
   const [keyboardWillShowSub, setKeyboardWillShowSub] = useState('');
   const [keyboardWillHideSub, setKeyboardWillHideSub] = useState('');
-  const user = useContext(UserContext);
-  console.log(user);
 
   // useEffect(() => {
   //   setKeyboardWillShowSub(
@@ -72,26 +70,6 @@ const Login = props => {
     console.log('Login button');
   };
 
-  const {loading, error, data} = useQuery(USERS_FETCH);
-
-  // this.props.navigation.navigate('Map')
-
-  if (loading) {
-    return (
-      <KeyboardAvoidingView style={styles.container} behavior="padding">
-        <Text>Loading...</Text>
-      </KeyboardAvoidingView>
-    );
-  }
-  if (error) {
-    console.log(error);
-    return (
-      <KeyboardAvoidingView style={styles.container} behavior="padding">
-        <Text>Error :(</Text>
-      </KeyboardAvoidingView>
-    );
-  }
-
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <View>
@@ -114,7 +92,7 @@ const Login = props => {
         autoCorrect={false}
         autoFocus
         keyboardType="default"
-        onChangeText={username => setUsername(username)}
+        onChangeText={uname => setUsername(uname)}
       />
 
       <Input
@@ -127,7 +105,7 @@ const Login = props => {
         clearButtonMode="never"
         secureTextEntry
         leftIcon={<Icon name="lock" size={24} color="black" />}
-        onChangeText={password => setPassword(password)}
+        onChangeText={pass => setPassword(pass)}
       />
 
       <Button
