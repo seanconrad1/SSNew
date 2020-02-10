@@ -1,4 +1,4 @@
-import React, {Component, useState, useEffect} from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,11 +8,12 @@ import {
   TouchableWithoutFeedback,
   Linking,
   SafeAreaView,
+  AsyncStorage,
 } from 'react-native';
-import MapView, {Callout} from 'react-native-maps';
-import {Icon, Button} from 'react-native-elements';
+import MapView, { Callout } from 'react-native-maps';
+import { Icon, Button } from 'react-native-elements';
 // import Icon from 'react-native-vector-icons/FontAwesome';
-import {withNavigation} from 'react-navigation';
+import GET_SPOTS from '../../graphql/queries/getSpots';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -28,66 +29,6 @@ import {
 
 // const CARD_HEIGHT = hp('100%') / 2;
 const CARD_WIDTH = wp('95%');
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    zIndex: 0,
-  },
-  scrollView: {
-    position: 'absolute',
-    backgroundColor: 'transparent',
-    bottom: -5,
-    left: 0,
-    right: 0,
-    paddingVertical: 10,
-  },
-  card: {
-    width: CARD_WIDTH,
-    height: hp('40%'),
-    padding: 10,
-    elevation: 1,
-    shadowOpacity: 0.75,
-    shadowRadius: 3,
-    shadowColor: 'grey',
-    shadowOffset: {height: 1, width: 1},
-    backgroundColor: '#FFF',
-    marginHorizontal: 10,
-    borderRadius: 20,
-  },
-  cardImage: {
-    position: 'absolute',
-    zIndex: 20,
-    borderRadius: 20,
-    flex: 4,
-    width: wp('90%'),
-    height: hp('32%'),
-    alignSelf: 'center',
-  },
-  textContent: {
-    flex: 1,
-  },
-  cardtitle: {
-    fontSize: hp('2%'),
-    marginTop: hp('32%'),
-    fontWeight: 'bold',
-    alignSelf: 'center',
-  },
-  cardDescription: {
-    fontSize: 12,
-    color: '#444',
-  },
-  markerWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  marker: {
-    width: 20,
-    height: 20,
-    // borderRadius: 4,
-    // backgroundColor: "rgba(244, 2, 87, .9)",
-  },
-});
 
 class Map extends Component {
   state = {
@@ -107,7 +48,7 @@ class Map extends Component {
         longitude: '-74.0060',
         description: 'A good spot',
         bust_factor: 10,
-        avatars: [{url: '/uploads/skate_spot/avatars/10/image.png'}],
+        avatars: [{ url: '/uploads/skate_spot/avatars/10/image.png' }],
         photo: 'n/a',
         user_id: 1,
       },
@@ -126,46 +67,46 @@ class Map extends Component {
     // this.refreshMarkers();
   }
 
-  // componentWillReceiveProps(nextProps) {
-  //   // This is the function to scroll
-  //   // to the end of the spots when a new spot is created
-  //   if (
-  //     this.props.navigation.getParam('index') !==
-  //       nextProps.navigation.getParam('index') &&
-  //     nextProps.navigation.getParam('index') !== undefined
-  //   ) {
-  //     // this.props.getSkateSpots()
-  //     this.scrollToNewSpot();
-  //   }
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    // This is the function to scroll
+    // to the end of the spots when a new spot is created
+    if (
+      this.props.navigation.getParam('index') !==
+        nextProps.navigation.getParam('index') &&
+      nextProps.navigation.getParam('index') !== undefined
+    ) {
+      // this.props.getSkateSpots()
+      this.scrollToNewSpot();
+    }
 
-  //   if (
-  //     this.props.user.skate_spots !== nextProps.user.skate_spots &&
-  //     nextProps.user.skate_spots !== undefined
-  //   ) {
-  //     this.setState({skatespots: nextProps.user.skate_spots});
-  //     // filter to show only spots near initial starting point
-  //     if (this.state.updateCounter <= 0) {
-  //       const area = 0.5;
-  //       if (
-  //         this.state.initialRegion &&
-  //         this.state.initialRegion.latitude > 0.1
-  //       ) {
-  //         const filteredSpots = nextProps.user.skate_spots.filter(
-  //           spot =>
-  //             spot.latitude < this.state.initialRegion.latitude + area &&
-  //             spot.latitude > this.state.initialRegion.latitude - area &&
-  //             spot.longitude < this.state.initialRegion.longitude + area &&
-  //             spot.longitude > this.state.initialRegion.longitude - area &&
-  //             spot.approved === true,
-  //         );
-  //         this.setState({filteredSpots});
-  //       }
-  //       // Animate to spot
-  //       this.addAnEventListener();
-  //       this.setState({updateCounter: 1});
-  //     }
-  //   }
-  // }
+    if (
+      this.props.user.skate_spots !== nextProps.user.skate_spots &&
+      nextProps.user.skate_spots !== undefined
+    ) {
+      this.setState({ skatespots: nextProps.user.skate_spots });
+      // filter to show only spots near initial starting point
+      if (this.state.updateCounter <= 0) {
+        const area = 0.5;
+        if (
+          this.state.initialRegion &&
+          this.state.initialRegion.latitude > 0.1
+        ) {
+          const filteredSpots = nextProps.user.skate_spots.filter(
+            spot =>
+              spot.latitude < this.state.initialRegion.latitude + area &&
+              spot.latitude > this.state.initialRegion.latitude - area &&
+              spot.longitude < this.state.initialRegion.longitude + area &&
+              spot.longitude > this.state.initialRegion.longitude - area &&
+              spot.approved === true,
+          );
+          this.setState({ filteredSpots });
+        }
+        // Animate to spot
+        this.addAnEventListener();
+        this.setState({ updateCounter: 1 });
+      }
+    }
+  }
 
   refreshMarkers = () => {
     // this.animation.removeAllListeners();
@@ -222,7 +163,7 @@ class Map extends Component {
   };
 
   addAnEventListener = () => {
-    this.animation.addListener(({value}) => {
+    this.animation.addListener(({ value }) => {
       let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
       if (index >= this.state.filteredSpots.length) {
         index = this.state.filteredSpots.length - 1;
@@ -249,55 +190,55 @@ class Map extends Component {
     });
   };
 
-  animateToUserLocation = () => {
-    navigator.geolocation.getCurrentPosition(position => {
-      console.log(position);
-      // this.map.animateToRegion(
-      //   {
-      //     latitude: position.coords.latitude,
-      //     longitude: position.coords.longitude,
-      //     latitudeDelta: 0.115,
-      //     longitudeDelta: 0.1121,
-      //   },
-      //   350,
-      // );
-    });
-  };
+  // animateToUserLocation = () => {
+  //   navigator.geolocation.getCurrentPosition(position => {
+  //     console.log(position);
+  //     // this.map.animateToRegion(
+  //     //   {
+  //     //     latitude: position.coords.latitude,
+  //     //     longitude: position.coords.longitude,
+  //     //     latitudeDelta: 0.115,
+  //     //     longitudeDelta: 0.1121,
+  //     //   },
+  //     //   350,
+  //     // );
+  //   });
+  // };
 
-  getUserLocationHandler = () => {
-    navigator.geolocation.getCurrentPosition(position => {
-      this.setState({
-        initialRegion: {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          latitudeDelta: 0.115,
-          longitudeDelta: 0.1121,
-        },
-        geoLocationSwitch: true,
-      });
-    });
-  };
+  // getUserLocationHandler = () => {
+  //   navigator.geolocation.getCurrentPosition(position => {
+  //     this.setState({
+  //       initialRegion: {
+  //         latitude: position.coords.latitude,
+  //         longitude: position.coords.longitude,
+  //         latitudeDelta: 0.115,
+  //         longitudeDelta: 0.1121,
+  //       },
+  //       geoLocationSwitch: true,
+  //     });
+  //   });
+  // };
 
-  goToSpotPage = marker => {
-    this.props.navigation.navigate('SpotPage', {skatespot: marker});
-  };
+  // goToSpotPage = marker => {
+  //   this.props.navigation.navigate('SpotPage', { skatespot: marker });
+  // };
 
-  onMarkerPressHandler = (marker, index) => {
-    this.myRef.getNode().scrollToIndex({index});
-  };
+  // onMarkerPressHandler = (marker, index) => {
+  //   this.myRef.getNode().scrollToIndex({ index });
+  // };
 
-  scrollToNewSpot = () => {
-    this.props.getSkateSpots();
-    // setTimeout(this.myRef.getNode().scrollToEnd, 500);
-    this.myRef.getNode().scrollToEnd();
-  };
+  // scrollToNewSpot = () => {
+  //   this.props.getSkateSpots();
+  //   // setTimeout(this.myRef.getNode().scrollToEnd, 500);
+  //   this.myRef.getNode().scrollToEnd();
+  // };
 
-  onRegionChange = region => {
-    this.setState({currentRegion: region});
-  };
+  // onRegionChange = region => {
+  //   this.setState({ currentRegion: region });
+  // };
 
   render() {
-    const {filteredSpots} = this.state;
+    const { filteredSpots } = this.state;
     console.log('map filtered spots --------', filteredSpots[0]);
     const interpolations = filteredSpots
       ? filteredSpots.map((marker, index) => {
@@ -316,7 +257,7 @@ class Map extends Component {
             outputRange: [10, 1, 10],
             extrapolate: 'clamp',
           });
-          return {scale, opacity};
+          return { scale, opacity };
         })
       : null;
 
@@ -327,7 +268,7 @@ class Map extends Component {
           onMapReady={() => console.log('ready!')}
           ref={map => (this.map = map)}
           initialRegion={this.state.initialRegion}
-          style={{flex: 1}}
+          style={{ flex: 1 }}
           // region={this.state.region}
           showsMyLocationButton
           onRegionChange={this.onRegionChange}>
@@ -352,7 +293,7 @@ class Map extends Component {
                     }}
                     title={marker.name}
                     description={marker.description}
-                    style={{width: 40, height: 40}}
+                    style={{ width: 40, height: 40 }}
                     onPress={e => {
                       e.stopPropagation();
                       this.onMarkerPressHandler(marker, index);
@@ -388,10 +329,8 @@ class Map extends Component {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() =>
-                  this.props.navigation.navigate('NewSpotPage', {
-                    scrollToNewSpot: this.scrollToNewSpot,
-                  })
+                onPress={async () =>
+                  await await AsyncStorage.setItem('AUTH_TOKEN', '')
                 }>
                 <Icon
                   raised
@@ -472,10 +411,10 @@ class Map extends Component {
                 },
               },
             ],
-            {useNativeDriver: true},
+            { useNativeDriver: true },
           )}
           data={filteredSpots}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <TouchableWithoutFeedback onPress={() => this.goToSpotPage(item)}>
               <View style={styles.card}>
                 {/* <Arrow /> */}
@@ -492,7 +431,7 @@ class Map extends Component {
                       `http://maps.apple.com/?daddr=${item.latitude},${item.longitude}`,
                     )
                   }
-                  style={{position: 'absolute', zIndex: 1}}>
+                  style={{ position: 'absolute', zIndex: 1 }}>
                   <Icon
                     raised
                     containerStyle={{
@@ -571,3 +510,68 @@ export default Map;
 // const connectMap = connect(mapStateToProps, mapDispatchToProps);
 
 // export default withNavigation(compose(connectMap)(Map));
+
+//  New spot function
+// this.props.navigation.navigate('NewSpotPage', {
+//   scrollToNewSpot: this.scrollToNewSpot,
+// })
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    zIndex: 0,
+  },
+  scrollView: {
+    position: 'absolute',
+    backgroundColor: 'transparent',
+    bottom: -5,
+    left: 0,
+    right: 0,
+    paddingVertical: 10,
+  },
+  card: {
+    width: CARD_WIDTH,
+    height: hp('40%'),
+    padding: 10,
+    elevation: 1,
+    shadowOpacity: 0.75,
+    shadowRadius: 3,
+    shadowColor: 'grey',
+    shadowOffset: { height: 1, width: 1 },
+    backgroundColor: '#FFF',
+    marginHorizontal: 10,
+    borderRadius: 20,
+  },
+  cardImage: {
+    position: 'absolute',
+    zIndex: 20,
+    borderRadius: 20,
+    flex: 4,
+    width: wp('90%'),
+    height: hp('32%'),
+    alignSelf: 'center',
+  },
+  textContent: {
+    flex: 1,
+  },
+  cardtitle: {
+    fontSize: hp('2%'),
+    marginTop: hp('32%'),
+    fontWeight: 'bold',
+    alignSelf: 'center',
+  },
+  cardDescription: {
+    fontSize: 12,
+    color: '#444',
+  },
+  markerWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  marker: {
+    width: 20,
+    height: 20,
+    // borderRadius: 4,
+    // backgroundColor: "rgba(244, 2, 87, .9)",
+  },
+});

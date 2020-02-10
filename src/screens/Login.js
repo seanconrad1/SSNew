@@ -1,82 +1,69 @@
-import React, {useReducer, useState, useEffect} from 'react';
-import {
-  Text,
-  StyleSheet,
-  View,
-  KeyboardAvoidingView,
-  Animated,
-} from 'react-native';
-
-import {UserContext} from '../../App';
-
-import {Input, Button} from 'react-native-elements';
+import React, { useState, useContext, useEffect } from 'react';
+import { StyleSheet, View, KeyboardAvoidingView, Text } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
+//Context
+import { store } from '../../store';
+import { Input, Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {withNavigation} from 'react-navigation';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import {useQuery} from '@apollo/react-hooks';
-import USERS_FETCH from '../graphql/queries/getUsers';
+import { useMutation } from '@apollo/react-hooks';
+import LOGIN_MUTATION from '../graphql/mutations/loginMutation';
 
 const FONT_SIZE_BIG = hp('8');
 const FONT_SIZE_SMALL = hp('6');
 
 const Login = props => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [fontSizeBig, setFontSizeBig] = useState(new Animated.Value(hp('8')));
-  const [keyboardWillShowSub, setKeyboardWillShowSub] = useState('');
-  const [keyboardWillHideSub, setKeyboardWillHideSub] = useState('');
+  const [email, setEmail] = useState('seanconrad123@gmail.com');
+  const [password, setPassword] = useState('California11!');
+  const globalState = useContext(store);
+  const { dispatch } = globalState;
 
-  // useEffect(() => {
-  //   setKeyboardWillShowSub(
-  //     Keyboard.addListener('keyboardWillShow', keyboardWillShowSub),
-  //   );
-  //   setKeyboardWillHideSub(
-  //     Keyboard.addListener('keyboardWillHide', keyboardWillHideSub),
-  //   );
-  //   onSubmit();
-  // }, [
-  //   keyboardWillHide,
-  //   keyboardWillHideSub,
-  //   keyboardWillShow,
-  //   keyboardWillShowSub,
-  // ]);
+  const [login] = useMutation(LOGIN_MUTATION);
 
-  // useEffect(() => {
-  //   return () => {
-  //     setKeyboardWillShowSub(keyboardWillShowSub.remove());
-  //     setKeyboardWillHideSub(keyboardWillHideSub.remove());
-  //   };
-  // }, [keyboardWillHideSub, keyboardWillShowSub]);
-  // //
-  // const keyboardWillShow = event => {
-  //   Animated.timing(fontSizeBig, {
-  //     duration: event.duration,
-  //     toValue: FONT_SIZE_SMALL,
-  //   }).start();
-  // };
+  useEffect(() => {
+    if (globalState.state.authorized) {
+      props.navigation.navigate('Map');
+    }
+  });
 
-  // const keyboardWillHide = event => {
-  //   Animated.timing(fontSizeBig, {
-  //     duration: event.duration,
-  //     toValue: FONT_SIZE_BIG,
-  //   }).start();
-  // };
+  const onSubmit = async () => {
+    let response;
 
-  const onSubmit = () => {
-    console.log('Login button');
+    try {
+      response = await login({ variables: { email, password } });
+    } catch (e) {
+      console.log('ERROR', e);
+    }
+
+    dispatch({
+      type: 'set user',
+      obj: {
+        name: response.data.login.name,
+        email: response.data.login.email,
+        user_id: response.data.login.user_id,
+        token: response.data.login.token,
+        authorized: true,
+      },
+    });
+
+    if (response.data.login.token) {
+      try {
+        await AsyncStorage.setItem('AUTH_TOKEN', response.data.login.token);
+      } catch (e) {
+        console.log('ERROR', e);
+      }
+    }
   };
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <View>
         {/*eslint-disable-next-line react-native/no-raw-text*/}
-        <Animated.Text style={[styles.header, {fontSize: fontSizeBig}]}>
-          SkateSense
-        </Animated.Text>
+        <Text style={[styles.header, { fontSize: hp('6') }]}>SkateSense</Text>
       </View>
 
       <View>
@@ -85,20 +72,22 @@ const Login = props => {
 
       <Input
         leftIconContainerStyle={styles.iconPadding}
-        placeholder="Username"
+        placeholder="Email"
         leftIcon={<Icon name="user" size={24} color="black" />}
         clearButtonMode="never"
         autoCapitalize="none"
         autoCorrect={false}
         autoFocus
+        value={email}
         keyboardType="default"
-        onChangeText={uname => setUsername(uname)}
+        onChangeText={uname => setEmail(uname)}
       />
 
       <Input
         leftIconContainerStyle={styles.iconPadding}
         returnKeyType="go"
         onSubmitEditing={onSubmit}
+        value={password}
         placeholder="Password"
         autoCapitalize="none"
         autoCorrect={false}
@@ -112,7 +101,7 @@ const Login = props => {
         icon={<Icon name="arrow-right" size={15} color="white" />}
         title="Submit"
         buttonStyle={styles.submitButton}
-        onPress={() => onSubmit()}
+        onPress={onSubmit}
         // disabled={this.props.authenticatingUser}
         // loading={this.props.authenticatingUser}
       />
@@ -158,7 +147,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     borderRadius: wp('20%'),
   },
-  iconPadding: {paddingRight: 8},
+  iconPadding: { paddingRight: 8 },
 });
 
 export default Login;

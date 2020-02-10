@@ -1,16 +1,11 @@
-import React, {useState, useEffect, useContext} from 'react';
-import {
-  StyleSheet,
-  View,
-  KeyboardAvoidingView,
-  Animated,
-  AsyncStorage,
-} from 'react-native';
-import {Input, Button} from 'react-native-elements';
+import React, { useState, useEffect, useContext } from 'react';
+import { StyleSheet, View, KeyboardAvoidingView, Animated } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
+import { Input, Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import CREATE_USER from '../graphql/mutations/newUserMutation';
-import {useMutation} from '@apollo/react-hooks';
-import {store} from '../../store';
+import { useMutation } from '@apollo/react-hooks';
+import { store } from '../../store';
 
 const SignUp = props => {
   const [name, setName] = useState('');
@@ -19,52 +14,54 @@ const SignUp = props => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const globalState = useContext(store);
-  const {dispatch} = globalState;
+  const { dispatch } = globalState;
 
   const [
     createUser,
-    {loading: mutationLoading, error: mutationError},
+    { loading: mutationLoading, error: mutationError },
   ] = useMutation(CREATE_USER);
 
   const onSubmit = async () => {
-    let data;
-    const obj = {
-      userInput: {
-        email,
-        name,
-        password,
-      },
-    };
+    props.navigation.navigate('Map');
 
-    try {
-      data = await createUser({variables: obj});
-    } catch (e) {
-      setError(e);
-    }
+    // let data;
+    // const obj = {
+    //   userInput: {
+    //     email,
+    //     name,
+    //     password,
+    //   },
+    // };
 
-    dispatch({
-      type: 'set user',
-      obj: {
-        name: data.data.createUser.name,
-        email: data.data.createUser.email,
-        user_id: data.data.createUser.user_id,
-        token: data.data.createUser.token,
-        authorized: true,
-      },
-    });
+    // try {
+    //   data = await createUser({ variables: obj });
+    // } catch (e) {
+    //   setError(e);
+    // }
 
-    try {
-      await AsyncStorage.setItem('AUTH_TOKEN', data.data.createUser.token);
-    } catch (e) {
-      return e;
-    }
-    setEmail('');
-    setPassword('');
-    setName('');
-    setConfirmPassword('');
-    if (!error) {
-      props.navigation.navigate('Map');
-    }
+    // dispatch({
+    //   type: 'set user',
+    //   obj: {
+    //     name: data.data.createUser.name,
+    //     email: data.data.createUser.email,
+    //     user_id: data.data.createUser.user_id,
+    //     token: data.data.createUser.token,
+    //     authorized: true,
+    //   },
+    // });
+
+    // try {
+    //   await AsyncStorage.setItem('AUTH_TOKEN', data.data.createUser.token);
+    // } catch (e) {
+    //   return e;
+    // }
+    // setEmail('');
+    // setPassword('');
+    // setName('');
+    // setConfirmPassword('');
+    // if (!error) {
+    //   props.navigation.navigate('Map');
+    // }
   };
 
   return (
@@ -160,7 +157,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     borderRadius: 20,
   },
-  iconPadding: {paddingRight: 8},
+  iconPadding: { paddingRight: 8 },
 });
 
 export default SignUp;

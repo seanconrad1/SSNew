@@ -1,18 +1,21 @@
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 // import {GRAPHQL_URL} from 'react-native-dotenv';
 
 //Components
 //Apollo
-import {AsyncStorage} from 'react-native';
-import {ApolloClient} from 'apollo-client';
-import {ApolloProvider} from '@apollo/react-hooks';
-import {setContext} from 'apollo-link-context';
-import {InMemoryCache} from 'apollo-cache-inmemory';
-import {onError} from 'apollo-link-error';
-import {HttpLink} from 'apollo-link-http';
+import AsyncStorage from '@react-native-community/async-storage';
+import { ApolloClient } from 'apollo-client';
+import { ApolloProvider } from '@apollo/react-hooks';
+import { setContext } from 'apollo-link-context';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { onError } from 'apollo-link-error';
+import { HttpLink } from 'apollo-link-http';
 import unfetch from 'unfetch';
 import Navigation from './src/navigation';
-import {StateProvider, store} from './store';
+import { StateProvider } from './store';
+import { enableScreens } from 'react-native-screens';
+
+enableScreens();
 
 // Create the client as outlined in the setup guide
 
@@ -48,10 +51,10 @@ const authLink = setContext(async (req, previousContext) => {
   return previousContext;
 });
 
-const errorLink = onError(async ({graphQLErrors, networkError}) => {
+const errorLink = onError(async ({ graphQLErrors, networkError }) => {
   let shouldLogout = false;
   if (graphQLErrors) {
-    graphQLErrors.forEach(({message, locations, path}) => {
+    graphQLErrors.forEach(({ message, locations, path }) => {
       if (message === 'Unauthorized') {
         shouldLogout = true;
       }

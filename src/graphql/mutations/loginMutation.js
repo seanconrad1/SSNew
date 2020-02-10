@@ -1,24 +1,12 @@
 import gql from 'graphql-tag';
 
 const LOGIN_MUTATION = gql`
-  query getUsers {
-    getUsers {
+  mutation login($email: String!, $password: String!) {
+    login(email: $email, password: $password) {
+      token
+      user_id
       name
-      bookmarks {
-        name
-        owner {
-          _id
-        }
-        description
-        images {
-          base64
-        }
-        location {
-          longitude
-          latitude
-        }
-        kickout_level
-      }
+      email
     }
   }
 `;
