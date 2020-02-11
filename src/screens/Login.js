@@ -26,7 +26,7 @@ const Login = props => {
 
   useEffect(() => {
     if (globalState.state.authorized) {
-      props.navigation.navigate('Map');
+      props.navigation.navigate('NavDrawer', { screen: 'Map' });
     }
   });
 

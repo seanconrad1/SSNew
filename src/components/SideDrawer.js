@@ -1,13 +1,7 @@
-import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, Icon } from 'react-native';
-import { NavigationActions } from 'react-navigation';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { Divider, ListItem } from 'react-native-elements';
-import {
-  DrawerContentScrollView,
-  DrawerItemList,
-  DrawerItem,
-} from '@react-navigation/drawer';
-// import { logoutUser } from '../action.js';
+import { DrawerContentScrollView } from '@react-navigation/drawer';
 
 const list = [
   {
@@ -47,7 +41,7 @@ const styles = StyleSheet.create({
 const SideMenu = props => {
   const logOut = () => {
     console.log('getting here');
-    props.navigation.navigate('Root', { screen: 'Login' });
+    props.navigation.navigate('Login');
   };
 
   // logOut = () => {
@@ -99,7 +93,7 @@ const SideMenu = props => {
               leftIcon={{ name: item.icon, type: item.type }}
               title={item.name}
               onPress={() =>
-                props.navigation.navigate('Map', { screen: i.name })
+                props.navigation.navigate('NavDrawer', { screen: item.name })
               }
             />
           ))}

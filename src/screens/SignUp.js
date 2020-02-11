@@ -22,46 +22,44 @@ const SignUp = props => {
   ] = useMutation(CREATE_USER);
 
   const onSubmit = async () => {
-    props.navigation.navigate('Map');
+    let data;
+    const obj = {
+      userInput: {
+        email,
+        name,
+        password,
+      },
+    };
 
-    // let data;
-    // const obj = {
-    //   userInput: {
-    //     email,
-    //     name,
-    //     password,
-    //   },
-    // };
+    try {
+      data = await createUser({ variables: obj });
+    } catch (e) {
+      setError(e);
+    }
 
-    // try {
-    //   data = await createUser({ variables: obj });
-    // } catch (e) {
-    //   setError(e);
-    // }
+    dispatch({
+      type: 'set user',
+      obj: {
+        name: data.data.createUser.name,
+        email: data.data.createUser.email,
+        user_id: data.data.createUser.user_id,
+        token: data.data.createUser.token,
+        authorized: true,
+      },
+    });
 
-    // dispatch({
-    //   type: 'set user',
-    //   obj: {
-    //     name: data.data.createUser.name,
-    //     email: data.data.createUser.email,
-    //     user_id: data.data.createUser.user_id,
-    //     token: data.data.createUser.token,
-    //     authorized: true,
-    //   },
-    // });
-
-    // try {
-    //   await AsyncStorage.setItem('AUTH_TOKEN', data.data.createUser.token);
-    // } catch (e) {
-    //   return e;
-    // }
-    // setEmail('');
-    // setPassword('');
-    // setName('');
-    // setConfirmPassword('');
-    // if (!error) {
-    //   props.navigation.navigate('Map');
-    // }
+    try {
+      await AsyncStorage.setItem('AUTH_TOKEN', data.data.createUser.token);
+    } catch (e) {
+      return e;
+    }
+    setEmail('');
+    setPassword('');
+    setName('');
+    setConfirmPassword('');
+    if (!error) {
+      props.navigation.navigate('NavDrawer', { screen: 'Map' });
+    }
   };
 
   return (

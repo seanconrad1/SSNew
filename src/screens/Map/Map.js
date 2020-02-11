@@ -204,9 +204,9 @@ const NewMap = props => {
 
   if (loading) {
     return (
-      <SafeAreaView style={{ backgroundColor: 'blue' }}>
-        <Text>Loading...</Text>
-      </SafeAreaView>
+      <View>
+        <Text> Loading...</Text>
+      </View>
     );
   }
   if (error) {
