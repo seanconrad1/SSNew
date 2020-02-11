@@ -1,5 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { StyleSheet, View, KeyboardAvoidingView, Text } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  KeyboardAvoidingView,
+  Text,
+  Alert,
+} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 //Context
 import { store } from '../../store';
@@ -36,7 +42,7 @@ const Login = props => {
     try {
       response = await login({ variables: { email, password } });
     } catch (e) {
-      console.log('ERROR', e);
+      Alert('test');
     }
 
     dispatch({
@@ -54,7 +60,7 @@ const Login = props => {
       try {
         await AsyncStorage.setItem('AUTH_TOKEN', response.data.login.token);
       } catch (e) {
-        console.log('ERROR', e);
+        Alert('test');
       }
     }
   };

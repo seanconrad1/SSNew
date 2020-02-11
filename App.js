@@ -40,7 +40,6 @@ const getAuthToken = async () => {
 const authLink = setContext(async (req, previousContext) => {
   // get the authentication token from local storage if it exists
   const jwt = await getAuthToken();
-  console.log('WHAT IS JWT: ', jwt);
   if (jwt) {
     return {
       headers: {

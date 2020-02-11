@@ -4,16 +4,16 @@ export const mapState = {
   initialRegion: {
     latitude: 40.7128,
     longitude: -74.006,
-    latitudeDelta: 12,
-    longitudeDelta: 10,
+    latitudeDelta: 0.115,
+    longitudeDelta: 0.1121,
   },
   geoLocationSwitch: false,
   animation: new Animated.Value(0),
   index: 0,
   updateCounter: 0,
   region: {
-    latitudeDelta: 0.04864195044303443,
-    longitudeDelta: 0.040142817690068,
+    latitudeDelta: 0.115,
+    longitudeDelta: 0.1121,
   },
   filteredSpots: [
     {
