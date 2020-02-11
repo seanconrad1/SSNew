@@ -6,10 +6,11 @@ import {
   Animated,
   StyleSheet,
   Image,
-  TouchableOpacity,
   TouchableWithoutFeedback,
+  TouchableOpacity,
   Linking,
 } from 'react-native';
+// import { TouchableOpacity } from 'react-native-gesture-handler';
 import MapView, { Callout } from 'react-native-maps';
 import { Icon, Button } from 'react-native-elements';
 import GET_SPOTS from '../../graphql/queries/getSpots';
@@ -277,9 +278,7 @@ const NewMap = props => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={async () =>
-                await AsyncStorage.setItem('AUTH_TOKEN', '')
-              }>
+              onPress={() => props.navigation.navigate('New Spot')}>
               <Icon
                 raised
                 name="plus"

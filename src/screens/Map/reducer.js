@@ -28,7 +28,7 @@ export const mapState = {
       },
       description: 'A good spot',
       kickout_level: 10,
-      images: [{ public_url: 'www.google.com', base64: 'asrgaseg' }],
+      images: [{ base64: 'asrgaseg' }],
     },
   ],
   map: {},

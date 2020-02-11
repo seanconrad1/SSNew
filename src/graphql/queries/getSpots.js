@@ -10,6 +10,9 @@ const GET_SPOTS = gql`
       }
       description
       kickout_level
+      images {
+        base64
+      }
     }
   }
 `;

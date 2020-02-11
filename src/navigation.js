@@ -7,6 +7,8 @@ import Login from './screens/Login';
 import Map from './screens/Map/Map';
 import SideDrawer from './components/SideDrawer';
 import SpotBook from './screens/SpotBook/SpotBook';
+import NewSpotPage from './screens/NewSpotPage/NewSpotPage';
+import LocationSelectorMap from './screens/NewSpotPage/LocationSelectorMap';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -34,9 +36,14 @@ const Navigation = props => {
         screenOptions={{
           headerShown: false,
         }}>
+        <Drawer.Screen name="NavDrawer" component={NavDrawer} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="SignUp" component={SignUp} />
-        <Drawer.Screen name="NavDrawer" component={NavDrawer} />
+        <Stack.Screen name="New Spot" component={NewSpotPage} />
+        <Stack.Screen
+          name="LocationSelectorMap"
+          component={LocationSelectorMap}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

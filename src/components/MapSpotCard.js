@@ -21,6 +21,8 @@ const MapSpotCard = ({ item }) => {
     console.log('test');
   };
 
+  console.log(item);
+
   return (
     <TouchableWithoutFeedback onPress={goToSpotPage}>
       <View style={styles.card}>
@@ -59,7 +61,7 @@ const MapSpotCard = ({ item }) => {
             <Image
               style={styles.cardImage}
               resizeMode="cover"
-              source={require('../../assets/wollenberg.jpg')}
+              source={{ uri: `data:image/gif;base64,${item.images[0].base64}` }}
               onPress={() => goToSpotPage(item)}
             />
           </View>
