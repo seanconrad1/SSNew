@@ -3,6 +3,7 @@ import gql from 'graphql-tag';
 const GET_SPOTS = gql`
   query getSpots {
     getSpots {
+      _id
       name
       location {
         latitude

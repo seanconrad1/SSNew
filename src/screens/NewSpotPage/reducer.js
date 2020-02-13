@@ -1,5 +1,3 @@
-import Geolocation from '@react-native-community/geolocation';
-
 export const newSpotState = {
   name: null,
   description: null,
@@ -12,6 +10,7 @@ export const newSpotState = {
   selectedLng: null,
   spotSubmitted: false,
   currentLocationSelected: false,
+  locationSelected: false,
 };
 
 export function reducer(state, action) {
@@ -31,22 +30,28 @@ export function reducer(state, action) {
       break;
     case 'SPOT_SUBMITED':
       return { ...state, spotSubmitted: action.payload };
-    // case 'SET_CURRENT_LOCATION':
-    //   Geolocation.getCurrentPosition(position => {
-    //     return {
-    //       ...state,
-    //       selectedLat: position.coords.latitude,
-    //       selectedLng: position.coords.longitude,
-    //       currentLocationSelected: true,
-    //     };
-    //   });
-    //   console.log(state);
-    //   break;
+    case 'SET_CURRENT_LOCATION':
+      return {
+        ...state,
+        selectedLat: action.payload.latitude,
+        selectedLng: action.payload.longitude,
+        currentLocationSelected: true,
+        locationSelected: false,
+      };
+    case 'REMOVE_LOCATION':
+      return {
+        ...state,
+        selectedLat: null,
+        selectedLng: null,
+        currentLocationSelected: false,
+      };
     case 'SET_LOCATION':
       return {
         ...state,
         selectedLat: action.payload.latitude,
         selectedLng: action.payload.longitude,
+        locationSelected: true,
+        currentLocationSelected: false,
       };
     default:
       throw new Error();

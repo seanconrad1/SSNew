@@ -25,25 +25,33 @@ import {
 } from 'react-native-responsive-screen';
 // import { fetchKeyForSkateSpots } from '../action.js';
 import { reducer, newSpotState } from './reducer';
-import NEW_SPOT_MUTATION from '../../graphql/mutations//newSpotMutation';
+import NEW_SPOT_MUTATION from '../../graphql/mutations/newSpotMutation';
+import GET_SPOTS from '../../graphql/queries/getSpots';
 import { store } from '../../../store';
+import Geolocation from '@react-native-community/geolocation';
 
 const NewSpotPage = props => {
   const [state, dispatch] = useReducer(reducer, newSpotState);
   const [createSpot, { data }] = useMutation(NEW_SPOT_MUTATION);
   const globalState = useContext(store);
-  let latitude;
-  let longitude;
 
-  if (props.route.params) {
-    latitude = props.route.params.selectedLocation.latitude;
-    longitude = props.route.params.selectedLocation.longitude;
-  }
+  console.log(state);
+
+  // let latitude;
+  // let longitude;
+
+  // if (props.route.params) {
+  // latitude = props.route.params.selectedLocation.latitude;
+  // longitude = props.route.params.selectedLocation.longitude;
+  // }
 
   useEffect(() => {
-    console.log('LATITUDE AND LONG CHANGEd');
-    dispatch({ type: 'SET_LOCATION', payload: { latitude, longitude } });
-  }, [latitude, longitude]);
+    if (props.route.params) {
+      const latitude = props.route.params.selectedLocation.latitude;
+      const longitude = props.route.params.selectedLocation.longitude;
+      dispatch({ type: 'SET_LOCATION', payload: { latitude, longitude } });
+    }
+  }, [props.route.params]);
 
   // updateStreetSpotType = streetSpotType => {
   //   this.setState({ streetSpotType });
@@ -98,14 +106,31 @@ const NewSpotPage = props => {
     props.navigation.navigate('Map');
   };
 
+  const getCurrentLocation = () => {
+    if (!state.currentLocationSelected) {
+      Geolocation.getCurrentPosition(position => {
+        dispatch({
+          type: 'SET_CURRENT_LOCATION',
+          payload: {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          },
+        });
+      });
+    } else {
+      dispatch({
+        type: 'REMOVE_LOCATION',
+        payload: {},
+      });
+    }
+  };
+
   const onSubmit = async () => {
     dispatch({ type: 'SPOT_SUBMITED', payload: true });
 
     const images = state.photo.map(img => {
       return { base64: img.data };
     });
-
-    console.log(images);
 
     try {
       await createSpot({
@@ -122,12 +147,13 @@ const NewSpotPage = props => {
             images,
           },
         },
+        refetchQueries: ['getSpots'],
       });
     } catch (e) {
       Alert('Unable to create spot at this time.');
     }
 
-    // approvalAlert();
+    approvalAlert();
   };
 
   // const streetSpotTypebuttons = ['Street Spot', 'Skatepark', 'DIY'];
@@ -145,6 +171,8 @@ const NewSpotPage = props => {
   //   'QP',
   // ];
   // const { streetSpotType, spotContains } = state;
+
+  console.log(state.locationSelected);
 
   return (
     <View>
@@ -167,7 +195,7 @@ const NewSpotPage = props => {
 
       <View style={styles.container}>
         <ScrollView>
-          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+          <View style={styles.imageBoxContainer}>
             <TouchableOpacity
               style={styles.photoBox}
               onPress={getPhotoFromCameraRoll}>
@@ -183,69 +211,63 @@ const NewSpotPage = props => {
             <TouchableOpacity
               style={styles.photoBox}
               onPress={getPhotoFromCameraRoll}>
-              {/* {state.photo && state.photo[1] ? (
+              {state.photo && state.photo[1] ? (
                 <Image
                   style={[styles.photoBox, { marginTop: -5 }]}
                   source={{ uri: state.photo[1].uri }}
                 />
-              ) : null} */}
+              ) : null}
               <Text style={{ alignSelf: 'flex-end', color: 'white' }}> + </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.photoBox}
               onPress={getPhotoFromCameraRoll}>
-              {/* {state.photo && state.photo[2] ? (
+              {state.photo && state.photo[2] ? (
                 <Image
                   style={[styles.photoBox, { marginTop: -5 }]}
                   source={{ uri: state.photo[2].uri }}
                 />
-              ) : null} */}
+              ) : null}
               <Text style={{ alignSelf: 'flex-end', color: 'white' }}> + </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.photoBox}
               onPress={getPhotoFromCameraRoll}>
-              {/* {state.photo && state.photo[3] ? (
+              {state.photo && state.photo[3] ? (
                 <Image
                   style={[styles.photoBox, { marginTop: -5 }]}
                   source={{ uri: state.photo[3].uri }}
                 />
-              ) : null} */}
+              ) : null}
               <Text style={{ alignSelf: 'flex-end', color: 'white' }}> + </Text>
             </TouchableOpacity>
           </View>
 
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignContent: 'center',
-              alignItems: 'center',
-            }}>
+          <View style={styles.buttonContainer}>
             <Button
-              buttonStyle={styles.spotLocationButton}
+              buttonStyle={
+                state.locationSelected
+                  ? styles.spotLocationSelected
+                  : styles.spotLocationButton
+              }
               title="Set Spot Location"
               onPress={() => props.navigation.navigate('LocationSelectorMap')}
-              containerStyle={{ marginBottom: 10 }}
             />
-            {/* <Text style={{ marginLeft: 10 }}>OR</Text> */}
-            {/* <Button
+            <Text style={{ marginLeft: 10, marginRight: 10 }}>OR</Text>
+            <Button
               buttonStyle={
                 state.currentLocationSelected
                   ? styles.spotLocationSelected
                   : styles.spotLocationButton
               }
               title="Use Current Location"
-              onPress={() =>
-                dispatch({ type: 'SET_CURRENT_LOCATION', payload: {} })
-              }
-              containerStyle={{ marginBottom: 10 }}
-            /> */}
+              onPress={getCurrentLocation}
+            />
           </View>
 
-          {/* {state.photo ? (
+          {state.photo ? (
             <View
               style={{
                 display: 'flex',
@@ -255,7 +277,7 @@ const NewSpotPage = props => {
               <Text>Photo Uploaded</Text>
               <Icon name="check" />
             </View>
-          ) : null} */}
+          ) : null}
 
           {state.selectedLat && state.selectedLat ? (
             <View
@@ -344,9 +366,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
-    height: 600,
+    height: '100%',
   },
-
+  imageBoxContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
   photoBox: {
     width: wp('21%'),
     height: wp('21%'),
@@ -355,10 +380,16 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     marginBottom: 20,
   },
-
+  buttonContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    width: '100%',
+  },
   spotLocationButton: {
-    width: wp('80%'),
-    marginLeft: wp('2'),
+    width: wp('36.5'),
     backgroundColor: 'rgb(244, 2, 87)',
   },
   spotLocationSelected: {

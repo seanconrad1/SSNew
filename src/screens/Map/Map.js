@@ -1,4 +1,10 @@
-import React, { useEffect, useReducer, useState, useRef } from 'react';
+import React, {
+  useEffect,
+  useReducer,
+  useState,
+  useRef,
+  useCallback,
+} from 'react';
 import {
   Text,
   SafeAreaView,
@@ -22,7 +28,6 @@ import {
 import Geolocation from '@react-native-community/geolocation';
 import markerIcon from '../../../assets/markerIcon.png';
 import { animateToUserLocation, addAnEventListener } from './utils';
-import AsyncStorage from '@react-native-community/async-storage';
 import { reducer, mapState } from './reducer';
 import MapSpotCard from '../../components/MapSpotCard';
 
@@ -31,9 +36,11 @@ const CARD_WIDTH = wp('95%');
 const NewMap = props => {
   const { loading, error, data, fetchMore } = useQuery(GET_SPOTS);
   const [state, dispatch] = useReducer(reducer, mapState);
-  const [mapRef, setMapRef] = useState('');
-  const [flatlistRef, setFlatListRef] = useState('');
-  const [regionTimeout, setRegionTimeout] = useState('');
+  const mapRef = useRef();
+  const flatListRef = useRef();
+
+  console.log('NEW MAP');
+  console.log(mapRef);
 
   useEffect(() => {
     Geolocation.getCurrentPosition(position => {
@@ -49,7 +56,8 @@ const NewMap = props => {
 
       dispatch({ type: 'SET_INIT_LOCATION', payload: initReg });
     });
-  }, []);
+    setAnimatorListener();
+  }, [setAnimatorListener]);
 
   useEffect(() => {
     if (data) {
@@ -59,9 +67,9 @@ const NewMap = props => {
 
   // This is the function to scroll
   // to the end of the spots when a new spot is created
-  useEffect(() => {
-    // this.scrollToNewSpot();
-  }, [props.navigation]);
+  // useEffect(() => {
+  //   flatlistRef.getNode().scrollToEnd();
+  // }, [flatlistRef, props.route.params]);
 
   useEffect(() => {
     // filter to show only spots near initial starting point
@@ -82,37 +90,7 @@ const NewMap = props => {
       // addAnEventListener();
       dispatch({ type: 'UPDATE_COUNTER', payload: 1 });
     }
-  }, [mapRef, state.initialRegion, state.updateCounter]);
-
-  // const addAnEventListener = () => {
-  //   state.animation.addListener(({ value }) => {
-  //     let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
-  //     if (index >= state.filteredSpots.length) {
-  //       index = state.filteredSpots.length - 1;
-  //     }
-  //     if (index <= 0) {
-  //       index = 0;
-  //     }
-
-  //     clearTimeout(regionTimeout);
-  //     setRegionTimeout(
-  //       setTimeout(() => {
-  //         if (state.index !== index) {
-  //           state.index = index;
-  //           mapRef.animateToRegion(
-  //             {
-  //               latitude: state.filteredSpots[index].latitude,
-  //               longitude: state.filteredSpots[index].longitude,
-  //               latitudeDelta: state.region.latitudeDelta,
-  //               longitudeDelta: state.region.longitudeDelta,
-  //             },
-  //             350,
-  //           );
-  //         }
-  //       }, 10),
-  //     );
-  //   });
-  // };
+  }, [state.updateCounter]);
 
   const onRegionChange = region => {
     dispatch({ type: 'SET_CURRENT_REGION', payload: region });
@@ -123,65 +101,68 @@ const NewMap = props => {
   };
 
   const onMarkerPressHandler = (marker, index) => {
-    flatlistRef.getNode().scrollToIndex({ index });
-  };
-
-  const scrollToNewSpot = () => {
-    // this.props.getSkateSpots();
-    // setTimeout(this.myRef.getNode().scrollToEnd, 500);
-    flatlistRef.getNode().scrollToEnd();
+    flatListRef.current.getNode().scrollToIndex({ index });
   };
 
   const refreshMarkers = () => {
     state.animation.removeAllListeners();
 
-    // const setAnimatorListener = () => {
-    //   state.animation.addListener(({ value }) => {
-    //     let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
-    //     if (index >= this.state.filteredSpots.length) {
-    //       index = this.state.filteredSpots.length - 1;
-    //     }
-    //     if (index <= 0) {
-    //       index = 0;
-    //     }
-    //     clearTimeout(this.regionTimeout);
-    //     this.regionTimeout = setTimeout(() => {
-    //       if (this.index !== index) {
-    //         this.index = index;
-    //         this.map.animateToRegion(
-    //           {
-    //             latitude: this.state.filteredSpots[index].latitude,
-    //             longitude: this.state.filteredSpots[index].longitude,
-    //             latitudeDelta: this.state.region.latitudeDelta,
-    //             longitudeDelta: this.state.region.longitudeDelta,
-    //           },
-    //           350,
-    //         );
-    //       }
-    //     }, 10);
-    //   });
-    // };
-    // const area = 0.5;
-    // if (
-    //   state.currentRegion &&
-    //   state.currentRegion.latitude > 0.1 &&
-    //   props.user.skate_spots !== undefined
-    // ) {
-    //   console.log(state.currentRegion.latitude, state.currentRegion.longitude);
-    //   const filteredSpots = this.props.user.skate_spots.filter(
-    //     spot =>
-    //       spot.latitude < this.state.currentRegion.latitude + area &&
-    //       spot.latitude > this.state.currentRegion.latitude - area &&
-    //       spot.longitude < this.state.currentRegion.longitude + area &&
-    //       spot.longitude > this.state.currentRegion.longitude - area &&
-    //       spot.approved === true,
-    //   );
-    //   // this.setState({filteredSpots: filteredSpots})
-    //   this.setState({ filteredSpots }, () => {
-    //     setAnimatorListener();
-    //   });
-    // }
+    const area = 0.05;
+    if (
+      state.currentRegion &&
+      state.currentRegion.latitude > 0.1 &&
+      data.getSpots !== undefined
+    ) {
+      // console.log(state.currentRegion.latitude, state.currentRegion.longitude);
+      const filteredSpots = data.getSpots.filter(
+        spot =>
+          spot.location.latitude < state.currentRegion.latitude + area &&
+          spot.location.latitude > state.currentRegion.latitude - area &&
+          spot.location.longitude < state.currentRegion.longitude + area &&
+          spot.location.longitude > state.currentRegion.longitude - area,
+        // spot.approved === true,
+      );
+      // setState({filteredSpots: filteredSpots})
+      dispatch({ type: 'SET_SPOTS', payload: filteredSpots });
+    }
+    // setAnimatorListener();
   };
+
+  const setAnimatorListener = useCallback(() => {
+    let regionTimeout = '';
+
+    state.animation.addListener(({ value }) => {
+      let animationIndex = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
+      if (animationIndex >= state.filteredSpots.length) {
+        animationIndex = state.filteredSpots.length - 1;
+      }
+      if (animationIndex <= 0) {
+        animationIndex = 0;
+      }
+
+      clearTimeout(regionTimeout);
+      regionTimeout = setTimeout(() => {
+        if (state.index !== animationIndex) {
+          state.index = animationIndex;
+          mapRef.current.animateToRegion(
+            {
+              latitude: state.filteredSpots[animationIndex].location.latitude,
+              longitude: state.filteredSpots[animationIndex].location.longitude,
+              latitudeDelta: state.region.latitudeDelta,
+              longitudeDelta: state.region.longitudeDelta,
+            },
+            350,
+          );
+        }
+      }, 10);
+    });
+  }, [
+    state.animation,
+    state.filteredSpots,
+    state.index,
+    state.region.latitudeDelta,
+    state.region.longitudeDelta,
+  ]);
 
   const interpolations = state.filteredSpots
     ? state.filteredSpots.map((marker, index) => {
@@ -220,7 +201,7 @@ const NewMap = props => {
       <MapView
         showsUserLocation
         onMapReady={() => console.log('ready!')}
-        ref={map => setMapRef(map)}
+        ref={mapRef}
         initialRegion={state.initialRegion}
         style={{ flex: 1 }}
         // region={this.state.region}
@@ -290,7 +271,7 @@ const NewMap = props => {
             </TouchableOpacity>
           </View>
 
-          {/* <Button
+          <Button
             raised
             icon={{
               name: 'refresh',
@@ -303,21 +284,8 @@ const NewMap = props => {
             containerStyle={styles.refreshContainer}
             buttonStyle={styles.refreshButtonStyle}
             titleStyle={styles.refreshButtonTitle}
-            onPress={fetchMore({
-              updateQuery: (prev, { fetchMoreResult, ...rest }) => {
-                if (!fetchMoreResult) {
-                  return prev;
-                }
-                console.log('HAT ARE FETCHMORE RESULTS', fetchMoreResult);
-                return {
-                  ...fetchMoreResult,
-                  getSpots: {
-                    ...fetchMoreResult.getSpots,
-                  },
-                };
-              },
-            })}
-          /> */}
+            onPress={refreshMarkers}
+          />
 
           <TouchableOpacity onPress={() => animateToUserLocation(mapRef)}>
             <Icon
@@ -334,8 +302,9 @@ const NewMap = props => {
 
       <Animated.FlatList
         horizontal
+        showsHorizontalScrollIndicator={false}
         style={styles.scrollView}
-        ref={flatlist => setFlatListRef(flatlist)}
+        ref={flatListRef}
         scrollEventThrottle={1}
         snapToInterval={CARD_WIDTH + 20}
         onScroll={Animated.event(
@@ -352,7 +321,7 @@ const NewMap = props => {
         )}
         data={state.filteredSpots}
         renderItem={({ item }) => (
-          <MapSpotCard item={item} CARD_WIDTH={CARD_WIDTH} />
+          <MapSpotCard spot={item} CARD_WIDTH={CARD_WIDTH} />
         )}
         keyExtractor={(item, index) => index.toString()}
       />

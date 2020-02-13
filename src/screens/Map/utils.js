@@ -2,7 +2,7 @@ import Geolocation from '@react-native-community/geolocation';
 
 export const animateToUserLocation = mapRef => {
   Geolocation.getCurrentPosition(position => {
-    mapRef.animateToRegion(
+    mapRef.current.animateToRegion(
       {
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,

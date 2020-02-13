@@ -13,31 +13,24 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { Icon, Button } from 'react-native-elements';
+import BookmarkButton from '../components/BookmarkButton';
 
 const CARD_WIDTH = wp('95%');
 
-const MapSpotCard = ({ item }) => {
+const MapSpotCard = ({ spot }) => {
   const goToSpotPage = () => {
     console.log('test');
   };
-
-  console.log(item);
-
+  console.log('MAP SPOT CARD');
   return (
     <TouchableWithoutFeedback onPress={goToSpotPage}>
       <View style={styles.card}>
         {/* <Arrow /> */}
-        {/* {item !== undefined && (
-        <BookmarkButton
-          spot={item}
-          style={{ position: 'absolute', zIndex: 1 }}
-        />
-      )} */}
-
+        <BookmarkButton spot={spot} />
         <TouchableOpacity
           onPress={() =>
             Linking.openURL(
-              `http://maps.apple.com/?daddr=${item.location.latitude},${item.location.longitude}`,
+              `http://maps.apple.com/?daddr=${spot.location.latitude},${spot.location.longitude}`,
             )
           }
           style={{ position: 'absolute', zIndex: 1 }}>
@@ -55,23 +48,22 @@ const MapSpotCard = ({ item }) => {
             color="black"
           />
         </TouchableOpacity>
-
         <TouchableOpacity onPress={goToSpotPage}>
           <View>
             <Image
               style={styles.cardImage}
               resizeMode="cover"
-              source={{ uri: `data:image/gif;base64,${item.images[0].base64}` }}
-              onPress={() => goToSpotPage(item)}
+              source={{ uri: `data:image/gif;base64,${spot.images[0].base64}` }}
+              onPress={() => goToSpotPage(spot)}
             />
           </View>
         </TouchableOpacity>
         <View style={styles.textContent}>
           <Text numberOfLines={1} style={styles.cardtitle}>
-            {item.name}
+            {spot.name}
           </Text>
           <Text numberOfLines={1} style={styles.cardDescription}>
-            {item.description}
+            {spot.description}
           </Text>
         </View>
       </View>

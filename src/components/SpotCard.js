@@ -57,6 +57,8 @@ const SpotCard = ({ spot, navigation }) => {
     );
   };
 
+  console.log(spot);
+
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -67,7 +69,7 @@ const SpotCard = ({ spot, navigation }) => {
       <Card
         key={spot.id}
         title={spot.name}
-        image={require('../../assets/wollenberg.jpg')}
+        image={{ uri: `data:image/gif;base64,${spot.images[0].base64}` }}
         containerStyle={styles.spot}>
         <Text
           style={{
