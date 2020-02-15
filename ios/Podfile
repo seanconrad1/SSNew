@@ -39,8 +39,6 @@ target 'SkateSense3' do
 
   pod 'react-native-geolocation', :path => '../node_modules/@react-native-community/geolocation'
 
-  pod 'react-native-cameraroll', :path => '../node_modules/@react-native-community/cameraroll'
-
   pod 'RNFS', :path => '../node_modules/react-native-fs'
 
   target 'SkateSense3Tests' do
