@@ -11,7 +11,13 @@ import {
 import { Icon, Card, Divider } from 'react-native-elements';
 import { findDistance } from '../utils/helpers';
 
-const SpotCard = ({ spot, navigation }) => {
+const SpotCard = ({
+  spot,
+  navigation,
+  bookmark,
+  unBookmarkAlertMsg,
+  deleteAlertMsg,
+}) => {
   const [distanceFrom, setDistanceFrom] = useState('');
 
   findDistance(setDistanceFrom, spot);
@@ -20,7 +26,7 @@ const SpotCard = ({ spot, navigation }) => {
     try {
       const result = await Share.share({
         message: `${spot.name}`,
-        url: `http://maps.apple.com/?daddr=${spot.latitude},${spot.longitude}`,
+        url: `http://maps.apple.com/?daddr=${spot.location.latitude},${spot.location.longitude}`,
       });
 
       if (result.action === Share.sharedAction) {
@@ -33,31 +39,9 @@ const SpotCard = ({ spot, navigation }) => {
         // dismissed
       }
     } catch (error) {
-      alert(error.message);
+      Alert.alert(error.message);
     }
   };
-
-  const deleteSpot = id => {
-    // delete spot
-  };
-
-  const deleteAlertMsg = id => {
-    Alert.alert(
-      'Deleting spot',
-      'Are you sure you want to delete this spot?',
-      [
-        { text: 'Yes', onPress: () => deleteSpot(id) },
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-      ],
-      { cancelable: false },
-    );
-  };
-
-  console.log(spot);
 
   return (
     <TouchableWithoutFeedback
@@ -71,16 +55,20 @@ const SpotCard = ({ spot, navigation }) => {
         title={spot.name}
         image={{ uri: `data:image/gif;base64,${spot.images[0].base64}` }}
         containerStyle={styles.spot}>
-        <Text
-          style={{
-            marginBottom: 40,
-            display: 'flex',
-            flexDirection: 'column',
-          }}>
-          <Text style={{ fontWeight: 'bold' }}>About: </Text>
+        <Text style={styles.aboutContainer}>
+          <Text style={styles.aboutContainerItem}>About: </Text>
           <Text>{spot.description}</Text>
-          <Text style={{ fontWeight: 'bold' }}>Distance: </Text>
-          {distanceFrom && <Text>{distanceFrom.toFixed(2)}mi</Text>}
+          {'\n'}
+
+          {distanceFrom && (
+            <>
+              <Text style={styles.aboutContainerItem}>Distance: </Text>
+              <Text>{distanceFrom.toFixed(2)}mi</Text>
+            </>
+          )}
+          {'\n'}
+          <Text style={styles.aboutContainerItem}>Kickout Level: </Text>
+          <Text>{spot.kickout_level}</Text>
         </Text>
 
         <Divider style={styles.divider} />
@@ -94,18 +82,30 @@ const SpotCard = ({ spot, navigation }) => {
             color="black"
             onPress={() =>
               Linking.openURL(
-                `http://maps.apple.com/?daddr=${spot.latitude},${spot.longitude}`,
+                `http://maps.apple.com/?daddr=${spot.location.latitude},${spot.location.longitude}`,
               )
             }
           />
-          <Icon
-            raised
-            name="trash"
-            type="font-awesome"
-            size={17}
-            color="rgb(244, 2, 87)"
-            onPress={() => deleteAlertMsg(spot.id)}
-          />
+          {bookmark ? (
+            <Icon
+              raised
+              name="bookmark"
+              size={15}
+              type="font-awesome"
+              color="rgb(244, 2, 87)"
+              onPress={() => unBookmarkAlertMsg(spot._id)}
+            />
+          ) : (
+            <Icon
+              raised
+              name="trash"
+              type="font-awesome"
+              size={17}
+              color="rgb(244, 2, 87)"
+              onPress={() => deleteAlertMsg(spot._id)}
+            />
+          )}
+
           <Icon
             raised
             name="share"
@@ -122,6 +122,8 @@ const SpotCard = ({ spot, navigation }) => {
 
 const styles = StyleSheet.create({
   spot: {
+    display: 'flex',
+    flexDirection: 'column',
     padding: 0,
     borderRadius: 20,
     shadowOpacity: 0.75,
@@ -134,6 +136,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  aboutContainer: {
+    marginBottom: 5,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  aboutContainerItem: {
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+
   // lastSpot: {
   //   paddingBottom: 100,
   //   borderRadius: 20,

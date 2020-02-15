@@ -18,13 +18,14 @@ import {
 
 import { useMutation } from '@apollo/react-hooks';
 import LOGIN_MUTATION from '../graphql/mutations/loginMutation';
+import { TEST_USERNAME, TEST_PASSWORD } from 'react-native-dotenv';
 
 const FONT_SIZE_BIG = hp('8');
 const FONT_SIZE_SMALL = hp('6');
 
 const Login = props => {
-  const [email, setEmail] = useState('seanconrad123@gmail.com');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(__DEV__ ? TEST_USERNAME : '');
+  const [password, setPassword] = useState(__DEV__ ? TEST_PASSWORD : '');
   const globalState = useContext(store);
   const { dispatch } = globalState;
   const [disableButton, setDisableButton] = useState(false);
@@ -43,15 +44,12 @@ const Login = props => {
     setDisableButton(true);
     try {
       response = await login({ variables: { email, password } });
-      console.log('ERROR: line 45 login response', response);
       setDisableButton(false);
     } catch (e) {
       console.log(e.networkError.response.status);
       console.log(e.networkError.response.statusText);
       console.log(e.networkError.result.errors);
       setErrors(e.networkError.result.errors);
-
-      // Alert('test');
       setDisableButton(false);
     }
 
@@ -78,8 +76,6 @@ const Login = props => {
     }
     setDisableButton(false);
   };
-
-  console.log(errors);
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">

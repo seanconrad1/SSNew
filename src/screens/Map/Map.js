@@ -51,6 +51,8 @@ const NewMap = props => {
         geoLocationSwitch: true,
       };
 
+      console.log(initReg.initialRegion);
+
       dispatch({ type: 'SET_INIT_LOCATION', payload: initReg });
     });
     // setAnimatorListener();

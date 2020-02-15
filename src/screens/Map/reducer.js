@@ -1,12 +1,24 @@
 import { Animated } from 'react-native';
+import Geolocation from '@react-native-community/geolocation';
+
+const getLocation = () => {
+  let initReg;
+  Geolocation.getCurrentPosition(position => {
+    let initReg = {
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+      latitudeDelta: 0.115,
+      longitudeDelta: 0.1121,
+    };
+
+    console.log(initReg.initialRegion);
+  });
+  return initReg;
+};
+// geoLocationSwitch: true,
 
 export const mapState = {
-  initialRegion: {
-    latitude: 40.7128,
-    longitude: -74.006,
-    latitudeDelta: 0.115,
-    longitudeDelta: 0.1121,
-  },
+  initialRegion: getLocation(),
   geoLocationSwitch: false,
   animation: new Animated.Value(0),
   index: 0,

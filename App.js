@@ -14,17 +14,15 @@ import unfetch from 'unfetch';
 import Navigation from './src/navigation';
 import { StateProvider } from './store';
 import { enableScreens } from 'react-native-screens';
-import { LIVE_GRAPHQL_URL } from 'react-native-dotenv';
+import { LIVE_GRAPHQL_URL, LOCAL_GRAPHQL_URL } from 'react-native-dotenv';
 
 enableScreens();
-
-console.log(LIVE_GRAPHQL_URL);
 
 // Create the client as outlined in the setup guide
 
 const cache = new InMemoryCache();
 const httpLink = new HttpLink({
-  uri: 'http://skatesense.info/',
+  uri: __DEV__ ? LOCAL_GRAPHQL_URL : LIVE_GRAPHQL_URL,
   fetch: unfetch,
 });
 
