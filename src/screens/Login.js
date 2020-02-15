@@ -23,10 +23,12 @@ const FONT_SIZE_BIG = hp('8');
 const FONT_SIZE_SMALL = hp('6');
 
 const Login = props => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('seanconrad123@gmail.com');
   const [password, setPassword] = useState('');
   const globalState = useContext(store);
   const { dispatch } = globalState;
+  const [disableButton, setDisableButton] = useState(false);
+  const [errors, setErrors] = useState([]);
 
   const [login] = useMutation(LOGIN_MUTATION);
 
@@ -38,11 +40,19 @@ const Login = props => {
 
   const onSubmit = async () => {
     let response;
-
+    setDisableButton(true);
     try {
       response = await login({ variables: { email, password } });
+      console.log('ERROR: line 45 login response', response);
+      setDisableButton(false);
     } catch (e) {
-      Alert('test');
+      console.log(e.networkError.response.status);
+      console.log(e.networkError.response.statusText);
+      console.log(e.networkError.result.errors);
+      setErrors(e.networkError.result.errors);
+
+      // Alert('test');
+      setDisableButton(false);
     }
 
     dispatch({
@@ -59,11 +69,17 @@ const Login = props => {
     if (response.data.login.token) {
       try {
         await AsyncStorage.setItem('AUTH_TOKEN', response.data.login.token);
+        setDisableButton(false);
       } catch (e) {
-        Alert('test');
+        // Alert('test');
+        console.log('ERROR: line 67 login', e);
+        setDisableButton(false);
       }
     }
+    setDisableButton(false);
   };
+
+  console.log(errors);
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
@@ -72,14 +88,17 @@ const Login = props => {
         <Text style={[styles.header, { fontSize: hp('6') }]}>SkateSense</Text>
       </View>
 
-      <View>
-        {/* <Text style={{ color: 'red' }}>{this.props.error ? this.props.error : null}</Text> */}
-      </View>
+      {errors.length > 0 && (
+        <View>
+          <Text style={styles.errors}>{errors[0].message}</Text>
+        </View>
+      )}
 
       <Input
         leftIconContainerStyle={styles.iconPadding}
         placeholder="Email"
         leftIcon={<Icon name="user" size={24} color="black" />}
+        inputContainerStyle={{}}
         clearButtonMode="never"
         autoCapitalize="none"
         autoCorrect={false}
@@ -108,8 +127,8 @@ const Login = props => {
         title="Submit"
         buttonStyle={styles.submitButton}
         onPress={onSubmit}
-        // disabled={this.props.authenticatingUser}
-        // loading={this.props.authenticatingUser}
+        disabled={disableButton}
+        loading={disableButton}
       />
 
       <Button
@@ -154,6 +173,9 @@ const styles = StyleSheet.create({
     borderRadius: wp('20%'),
   },
   iconPadding: { paddingRight: 8 },
+  errors: {
+    color: 'red',
+  },
 });
 
 export default Login;

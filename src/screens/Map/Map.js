@@ -39,9 +39,6 @@ const NewMap = props => {
   const mapRef = useRef();
   const flatListRef = useRef();
 
-  console.log('NEW MAP');
-  console.log(mapRef);
-
   useEffect(() => {
     Geolocation.getCurrentPosition(position => {
       const initReg = {
@@ -56,8 +53,8 @@ const NewMap = props => {
 
       dispatch({ type: 'SET_INIT_LOCATION', payload: initReg });
     });
-    setAnimatorListener();
-  }, [setAnimatorListener]);
+    // setAnimatorListener();
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -87,7 +84,7 @@ const NewMap = props => {
       //   dispatch({ type: 'SET_SPOTS', payload: filteredSpots });
       // }
       // Animate to spot
-      addAnEventListener();
+      // addAnEventListener();
       dispatch({ type: 'UPDATE_COUNTER', payload: 1 });
     }
   }, [state.updateCounter]);
@@ -125,7 +122,7 @@ const NewMap = props => {
       // setState({filteredSpots: filteredSpots})
       dispatch({ type: 'SET_SPOTS', payload: filteredSpots });
     }
-    setAnimatorListener();
+    // setAnimatorListener();
   };
 
   const setAnimatorListener = useCallback(() => {

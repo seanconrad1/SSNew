@@ -21,7 +21,6 @@ const MapSpotCard = ({ spot }) => {
   const goToSpotPage = () => {
     console.log('test');
   };
-  console.log('MAP SPOT CARD');
   return (
     <TouchableWithoutFeedback onPress={goToSpotPage}>
       <View style={styles.card}>
