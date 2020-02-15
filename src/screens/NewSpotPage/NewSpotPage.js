@@ -29,13 +29,13 @@ import NEW_SPOT_MUTATION from '../../graphql/mutations/newSpotMutation';
 import GET_SPOTS from '../../graphql/queries/getSpots';
 import { store } from '../../../store';
 import Geolocation from '@react-native-community/geolocation';
+import ImageResizer from 'react-native-image-resizer';
+import RNFS from 'react-native-fs';
 
 const NewSpotPage = props => {
   const [state, dispatch] = useReducer(reducer, newSpotState);
   const [createSpot, { data }] = useMutation(NEW_SPOT_MUTATION);
   const globalState = useContext(store);
-
-  console.log(state);
 
   // let latitude;
   // let longitude;
@@ -60,39 +60,54 @@ const NewSpotPage = props => {
   //   this.setState({ spotContains });
   // };
 
+  const resize = photos => {
+    ImageResizer.createResizedImage(photos.uri, 350, 280, 'JPEG', 300)
+      .then(res => {
+        // response.uri is the URI of the new image that can now be displayed, uploaded...
+        // response.path is the path of the new image
+        // response.name is the name of the new image with the extension
+        // response.size is the size of the new image
+        RNFS.readFile(res.path, 'base64')
+          .then(respo => {
+            const photo = {
+              path: res.path,
+              uri: res.uri,
+              data: respo,
+            };
+            if (state.photo && state.photo.length === 4) {
+              return null;
+            }
+            dispatch({ type: 'SET_PHOTO', payload: photo });
+          })
+          .catch(err => {
+            console.log(err);
+          });
+        // // Limit to 4 photos uploaded
+      })
+      .catch(err => {
+        console.log(err);
+        // Oops, something went wrong. Check that the filename is correct and
+        // inspect err to get more details.
+      });
+  };
+
   const getPhotoFromCameraRoll = () => {
-    const options = {
-      title: 'Select Skatespot Photo',
-      // customButtons: [{ name: 'fb', title: 'Choose Photo from Facebook' }],
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-    //   ImagePicker.launchCamera(options, (response) => {
-    // // Same code as in above section!
-    //   });
-    ImagePicker.showImagePicker(options, response => {
+    ImagePicker.showImagePicker(response => {
+      console.log('Response = ', response);
+
       if (response.didCancel) {
-        console.log('User cancelled photo picker');
+        console.log('User cancelled image picker');
       } else if (response.error) {
         console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
       } else {
-        const source = {
-          uri: response.uri.replace('file://', ''),
-          isStatic: true,
-        };
-        const photo = {
-          uri: source.uri,
-          type: 'image/jpeg',
-          name: response.fileName,
-          data: response.data,
-        };
-        // Limit to 4 photos uploaded
-        if (state.photo && state.photo.length === 4) {
-          return null;
-        }
-        dispatch({ type: 'SET_PHOTO', payload: photo });
+        const source = { uri: response.uri };
+
+        resize(response);
+
+        // You can also display the image using data:
+        // const source = { uri: 'data:image/jpeg;base64,' + response.data };
       }
     });
   };
@@ -101,9 +116,15 @@ const NewSpotPage = props => {
     Alert.alert(
       'Thanks for submitting a spot!',
       'Your spot needs to go through approval before being posted. It should be approved within a day.',
+      [
+        {
+          text: 'OK',
+          onPress: () =>
+            props.navigation.navigate('NavDrawer', { screen: 'Map' }),
+        },
+      ],
       { cancelable: false },
     );
-    props.navigation.navigate('Map');
   };
 
   const getCurrentLocation = () => {
@@ -171,8 +192,6 @@ const NewSpotPage = props => {
   //   'QP',
   // ];
   // const { streetSpotType, spotContains } = state;
-
-  console.log(state.locationSelected);
 
   return (
     <View>
