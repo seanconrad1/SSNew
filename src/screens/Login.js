@@ -23,8 +23,8 @@ const FONT_SIZE_BIG = hp('8');
 const FONT_SIZE_SMALL = hp('6');
 
 const Login = props => {
-  const [email, setEmail] = useState('seanconrad123@gmail.com');
-  const [password, setPassword] = useState('California11!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const globalState = useContext(store);
   const { dispatch } = globalState;
 
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     // marginTop: hp('25%'),
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgb(40, 44, 52)',
+    backgroundColor: 'white',
   },
   header: {
     fontFamily: 'Lobster-Regular',
