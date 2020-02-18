@@ -32,6 +32,7 @@ import { store } from '../../../store';
 import Geolocation from '@react-native-community/geolocation';
 import ImageResizer from 'react-native-image-resizer';
 import RNFS from 'react-native-fs';
+import CustomButtonGroup from '../../components/CustomButtonGroup';
 
 const NewSpotPage = props => {
   const [state, dispatch] = useReducer(reducer, newSpotState);
@@ -173,7 +174,7 @@ const NewSpotPage = props => {
               latitude: state.selectedLat,
               longitude: state.selectedLng,
             },
-            owner: globalState.state.user_id,
+            owner: user_id,
             images,
           },
         },
@@ -186,21 +187,20 @@ const NewSpotPage = props => {
     approvalAlert();
   };
 
-  // const streetSpotTypebuttons = ['Street Spot', 'Skatepark', 'DIY'];
-  // const streetSpotContains = [
-  //   'Flatbar',
-  //   'Bank',
-  //   'Stair',
-  //   'Ditch',
-  //   'Wallride',
-  //   'Drop Gap',
-  //   'Flat Gap',
-  //   'Ledge',
-  //   'Polejam',
-  //   'Manual Pad',
-  //   'QP',
-  // ];
-  // const { streetSpotType, spotContains } = state;
+  const streetSpotTypebuttons = ['Street Spot', 'Skatepark', 'DIY'];
+  const streetSpotContains = [
+    'Flatbar',
+    'Bank',
+    'Stair',
+    'Ditch',
+    'Wallride',
+    'Drop Gap',
+    'Flat Gap',
+    'Ledge',
+    'Polejam',
+    'Manual Pad',
+    'QP',
+  ];
 
   return (
     <View>
@@ -353,35 +353,59 @@ const NewSpotPage = props => {
             }}>
             Kickout meter
           </Text>
-          <View style={{ marginLeft: wp('1%'), width: '100%' }}>
-            <Slider
-              thumbTintColor="rgb(244, 2, 87)"
-              style={{ width: '90%' }}
-              step={1}
-              maximumValue={10}
-              animateTransitions={true}
-              value={state.kickout}
-              onValueChange={value =>
-                dispatch({ type: 'SET_KICKOUT_LEVEL', payload: value })
-              }
-            />
+          <Slider
+            thumbTintColor="rgb(244, 2, 87)"
+            style={{ width: '90%' }}
+            step={1}
+            maximumValue={10}
+            animateTransitions={true}
+            value={state.kickout}
+            onValueChange={value =>
+              dispatch({ type: 'SET_KICKOUT_LEVEL', payload: value })
+            }
+          />
+
+          <Text
+            style={{
+              alignSelf: 'flex-start',
+              marginLeft: wp('1%'),
+              opacity: 0.5,
+              fontSize: 17,
+              marginTop: 10,
+            }}>
+            Spot Type
+          </Text>
+          <ButtonGroup
+            // onPress={this.updateStreetSpotType}
+            // selectedIndex={streetSpotType}
+            buttons={streetSpotTypebuttons}
+            containerStyle={{ height: 50 }}
+            selectedButtonStyle={{ backgroundColor: 'rgb(244, 2, 87)' }}
+          />
+
+          <Text
+            style={{
+              alignSelf: 'flex-start',
+              marginLeft: wp('1%'),
+              opacity: 0.5,
+              fontSize: 17,
+              marginTop: 10,
+            }}>
+            Spot Contains
+          </Text>
+          <View style={styles.containsContainer}>
+            {streetSpotContains.map(button => (
+              <CustomButtonGroup button={button} />
+            ))}
           </View>
 
-          {/* <ButtonGroup
-            // onPress={this.updateStreetSpotType}
-            selectedIndex={streetSpotType}
-            buttons={streetSpotTypebuttons}
-            containerStyle={{ height: 100 }}
-            selectedButtonStyle={{ backgroundColor: 'rgb(244, 2, 87)' }}
-          /> */}
-
-          <View>
+          {/* <View>
             <Button
               title="Submit"
               buttonStyle={styles.submitButton}
               onPress={onSubmit}
             />
-          </View>
+          </View> */}
         </ScrollView>
       </View>
     </View>
@@ -393,8 +417,10 @@ const styles = StyleSheet.create({
     flex: 0,
     justifyContent: 'center',
     alignItems: 'center',
+    alignContent: 'center',
     backgroundColor: 'white',
     height: '100%',
+    padding: 12,
   },
   imageBoxContainer: {
     flexDirection: 'row',
@@ -417,7 +443,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   spotLocationButton: {
-    width: wp('36.5'),
+    // width: wp('36.5'),
     backgroundColor: 'rgb(244, 2, 87)',
   },
   spotLocationSelected: {
@@ -435,10 +461,15 @@ const styles = StyleSheet.create({
     borderRadius: wp('20%'),
     marginBottom: hp('2%'),
   },
-  buttonGroup: {
-    height: 100,
-    marginBottom: 0,
-    marginTop: 0,
+  containsContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    height: 10,
+    width: '100%',
+    color: 'grey',
+    flexWrap: 'wrap',
+    // margin: 20,
   },
 });
 

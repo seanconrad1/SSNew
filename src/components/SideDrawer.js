@@ -14,6 +14,11 @@ const list = [
     type: 'font-awesome',
     icon: 'bookmark',
   },
+  {
+    name: 'Approvals',
+    type: 'font-awesome',
+    icon: 'globe',
+  },
   // {
   //   name: 'Settings',
   //   type: 'font-awesome',
@@ -50,22 +55,6 @@ const SideMenu = props => {
   //     .removeJWT('jwt')
   //     .then(() => this.props.logoutUser())
   //     .then(() => this.props.navigation.navigate('Login'));
-  // };
-
-  // approvals = () => {
-  //   if (
-  //     this.props.user.user.username === 'seanrad' ||
-  //     this.props.user.user.username === 'zackrosebrugh' ||
-  //     this.props.user.user.username === 'p0intBlankk'
-  //   ) {
-  //     return (
-  //       <ListItem
-  //         title="Approvals"
-  //         leftIcon={{ name: 'check', type: 'font-awesome' }}
-  //         onPress={() => this.props.navigation.navigate('Approvals')}
-  //       />
-  //     );
-  //   }
   // };
 
   // administration = () => {

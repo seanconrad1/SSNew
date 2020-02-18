@@ -9,6 +9,7 @@ import SideDrawer from './components/SideDrawer';
 import SpotBook from './screens/SpotBook/SpotBook';
 import NewSpotPage from './screens/NewSpotPage/NewSpotPage';
 import LocationSelectorMap from './screens/NewSpotPage/LocationSelectorMap';
+import Approvals from './screens/Approvals';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -25,6 +26,7 @@ function NavDrawer() {
       {/* <Drawer.Screen name="Root" component={Root} /> */}
       <Drawer.Screen name="Map" component={Map} />
       <Drawer.Screen name="My Spots" component={SpotBook} />
+      <Drawer.Screen name="Approvals" component={Approvals} />
     </Drawer.Navigator>
   );
 }
