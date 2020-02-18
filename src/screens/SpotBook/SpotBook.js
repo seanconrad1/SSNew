@@ -7,6 +7,7 @@ import {
   TextInput,
   Alert,
   RefreshControl,
+  AsyncStorage,
 } from 'react-native';
 import { Header } from 'react-native-elements';
 import {
@@ -19,7 +20,6 @@ import GET_BOOKMARKS from '../../graphql/queries/getBookmarks';
 import DELETE_SPOT_MUTATION from '../../graphql/mutations/deleteSpotMutation';
 import DELETE_BOOKMARK_MUTATION from '../../graphql/mutations/deleteBookmarkMutation';
 import { useQuery, useMutation } from '@apollo/react-hooks';
-import { store } from '../../../store';
 import { reducer, spotBookState } from './reducer';
 import SpotCard from '../../components/SpotCard';
 import SpotsButtonGroup from '../../components/SpotsButtonGroup';
@@ -27,21 +27,34 @@ import SpotsButtonGroup from '../../components/SpotsButtonGroup';
 console.disableYellowBox = true;
 
 const SpotBook = props => {
-  const globalState = useContext(store);
   const [state, dispatch] = useReducer(reducer, spotBookState);
   const [deleteSpot] = useMutation(DELETE_SPOT_MUTATION);
   const [deleteBookmark] = useMutation(DELETE_BOOKMARK_MUTATION);
+  const [user_id, setUserID] = useState();
 
-  const user_id = globalState.state.user_id;
-  const { loading, error, data: createdSpots } = useQuery(GET_MY_SPOTS, {
-    variables: { user_id },
-  });
-  const { loading: loading2, error: error2, data: bookmarks } = useQuery(
-    GET_BOOKMARKS,
+  useEffect(() => {
+    const getID = async () => {
+      const id = await AsyncStorage.getItem('USER_ID');
+      setUserID(id);
+    };
+
+    getID();
+  }, []);
+
+  const { data: createdSpots, loading, error, refetch } = useQuery(
+    GET_MY_SPOTS,
     {
       variables: { user_id },
     },
   );
+  const {
+    data: bookmarks,
+    loading: loading2,
+    error: error2,
+    refetch: refetch2,
+  } = useQuery(GET_BOOKMARKS, {
+    variables: { user_id },
+  });
   const [tab, setTab] = useState(0);
   const [term, setTerm] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -65,24 +78,14 @@ const SpotBook = props => {
     return <Text>Loading...</Text>;
   }
   if (error) {
-    console.log('Error retrieving data');
     return <Text>An error occured</Text>;
   }
-
-  const onRefresh = () => {
-    console.log('REFRESHING');
-    setRefreshing(true);
-
-    setRefreshing(false);
-  };
 
   const onSearchChange = e => setTerm(e);
 
   const onChangeTab = e => setTab(e);
 
   const unBookmark = async _id => {
-    console.log(_id);
-
     try {
       await deleteBookmark({
         variables: {
@@ -91,10 +94,14 @@ const SpotBook = props => {
             user_id,
           },
         },
-        refetchQueries: ['getUser'],
+        onCompleted: refetch2,
+      });
+      dispatch({
+        type: 'DELETE_BOOKMARK',
+        payload: _id,
       });
     } catch (e) {
-      Alert('Unable to create spot at this time.');
+      Alert('Unable to delete spot at this time.');
     }
   };
 
@@ -120,7 +127,11 @@ const SpotBook = props => {
         variables: {
           _id,
         },
-        refetchQueries: ['getUserCreatedSpots', 'getUser'],
+        refetchQueries: ['getUserCreatedSpots', 'getUser', 'getSpots'],
+      });
+      dispatch({
+        type: 'DELETE_SPOT',
+        payload: _id,
       });
     } catch (e) {
       Alert('Unable to create spot at this time.');
@@ -141,6 +152,18 @@ const SpotBook = props => {
       ],
       { cancelable: false },
     );
+  };
+
+  const launchRefetch = () => {
+    if (tab === 0) {
+      console.log('REFETCH 1');
+      refetch();
+    }
+    if (tab === 1) {
+      console.log('REFETCH 2');
+
+      refetch2();
+    }
   };
 
   return (
@@ -170,7 +193,7 @@ const SpotBook = props => {
       <ScrollView
         contentContainerStyle={{ paddingBottom: 200 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={launchRefetch} />
         }>
         {tab === 0
           ? state.mySpots.map((spot, i) => (
@@ -183,7 +206,7 @@ const SpotBook = props => {
             ))
           : null}
 
-        {tab === 1
+        {tab === 1 && state.bookmarkedSpots.length > 0
           ? state.bookmarkedSpots.map((spot, i) => (
               <SpotCard
                 key={i}

@@ -1,55 +1,93 @@
-import React, { useState, useContext } from 'react';
-import { View, TouchableOpacity } from 'react-native';
-import { useMutation } from '@apollo/react-hooks';
+import React, { useState, useCallback, useEffect } from 'react';
+import { TouchableOpacity, AsyncStorage } from 'react-native';
+import { useMutation, useQuery } from '@apollo/react-hooks';
 import { Icon } from 'react-native-elements';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import NEW_BOOKMARK_MUTATION from '../graphql/mutations/newBookmarkMutation';
-import { store } from '../../store';
+import DELETE_BOOKMARK_MUTATION from '../graphql/mutations/deleteBookmarkMutation';
+
+import GET_BOOKMARKS from '../graphql/queries/getBookmarks';
 
 const BookmarkButton = ({ spot }) => {
   const [bookmarked, setBookmark] = useState(false);
-  const [createBookmark, loading, error] = useMutation(NEW_BOOKMARK_MUTATION);
-  const globalState = useContext(store);
+  const [user_id, setUserID] = useState();
 
-  // const [spotID, setSpotID] = useState(item._id);
-  // currentUserid: this.props.user.user.id,
+  useEffect(() => {
+    const getID = async () => {
+      const id = await AsyncStorage.getItem('USER_ID');
+      setUserID(id);
+    };
 
-  // const checkIfUserBookmarkedSpot = () => {
-  //   // debugger
-  //   const data = this.props.user.user ? this.props.user.user.bookmarks : null;
-  //   if (data !== null) {
-  //     const bookmarked = data.find(
-  //       bookmarks => bookmarks.skate_spot_id === this.state.spotID,
-  //     );
-  //     if (bookmarked) {
-  //       return this.setState({
-  //         bookmarked: true,
-  //         currentBookmarkid: bookmarked.id,
-  //       });
-  //     }
-  //     return null;
-  //   }
-  // };
+    getID();
+  }, []);
 
-  const bookmarkSpot = () => {
-    createBookmark({
-      // refetchQueries: ['']
-      variables: {
-        bookmarkInput: {
-          user_id: globalState.state.user_id,
-          spot_id: spot._id,
-        },
+  console.log(user_id);
+
+  const {
+    loading: loading2,
+    error: error2,
+    data: bookmarks,
+    refetch,
+  } = useQuery(GET_BOOKMARKS, {
+    variables: { user_id },
+  });
+
+  const [createBookmark] = useMutation(NEW_BOOKMARK_MUTATION, {
+    variables: {
+      bookmarkInput: {
+        user_id,
+        spot_id: spot._id,
       },
-    });
-    console.log('bookmark spot!');
+    },
+    onCompleted: refetch,
+    awaitRefetchQueries: true,
+  });
+  const [deleteBookmark] = useMutation(DELETE_BOOKMARK_MUTATION, {
+    variables: {
+      bookmarkInput: {
+        user_id: user_id,
+        spot_id: spot._id,
+      },
+    },
+    onCompleted: refetch,
+    awaitRefetchQueries: true,
+  });
+
+  useEffect(() => {
+    console.log('useEffect running');
+    checkIfUserBookmarkedSpot();
+  }, [checkIfUserBookmarkedSpot, bookmarks]);
+
+  const checkIfUserBookmarkedSpot = useCallback(() => {
+    console.log('CHECKING!');
+    if (bookmarks && !loading2) {
+      const isBookmarked = bookmarks.getUser.bookmarks.find(
+        bmark => bmark._id === spot._id,
+      );
+      if (isBookmarked) {
+        setBookmark(true);
+      } else {
+        setBookmark(false);
+      }
+      return null;
+    }
+  }, [bookmarks, loading2, spot._id]);
+
+  const bookmarkSpot = async () => {
+    await createBookmark();
+    checkIfUserBookmarkedSpot();
   };
 
-  const unBookmarkSpot = () => {
-    // debugger
+  const unBookmarkSpot = async () => {
+    await deleteBookmark();
+    checkIfUserBookmarkedSpot();
   };
+  if (bookmarks) {
+    console.log('MY BOOKMARKS:', bookmarks.getUser.bookmarks);
+  }
 
   return (
     <TouchableOpacity style={{ position: 'absolute', zIndex: 1 }}>

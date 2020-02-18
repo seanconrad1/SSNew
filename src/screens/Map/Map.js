@@ -1,20 +1,11 @@
-import React, {
-  useEffect,
-  useReducer,
-  useState,
-  useRef,
-  useCallback,
-} from 'react';
+import React, { useEffect, useReducer, useRef, useCallback } from 'react';
 import {
   Text,
-  SafeAreaView,
   View,
   Animated,
   StyleSheet,
   Image,
-  TouchableWithoutFeedback,
   TouchableOpacity,
-  Linking,
 } from 'react-native';
 // import { TouchableOpacity } from 'react-native-gesture-handler';
 import MapView, { Callout } from 'react-native-maps';
@@ -33,36 +24,39 @@ import MapSpotCard from '../../components/MapSpotCard';
 
 const CARD_WIDTH = wp('95%');
 
-const NewMap = props => {
-  const { loading, error, data, fetchMore } = useQuery(GET_SPOTS);
+const Map = props => {
+  const { loading, error, data, refetch } = useQuery(GET_SPOTS);
   const [state, dispatch] = useReducer(reducer, mapState);
   const mapRef = useRef();
   const flatListRef = useRef();
 
   useEffect(() => {
-    Geolocation.getCurrentPosition(position => {
-      const initReg = {
-        initialRegion: {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          latitudeDelta: 0.115,
-          longitudeDelta: 0.1121,
-        },
-        geoLocationSwitch: true,
-      };
-
-      console.log(initReg.initialRegion);
-
-      dispatch({ type: 'SET_INIT_LOCATION', payload: initReg });
-    });
-    // setAnimatorListener();
-  }, []);
-
-  useEffect(() => {
     if (data) {
-      dispatch({ type: 'SET_SPOTS', payload: data.getSpots });
+      Geolocation.getCurrentPosition(position => {
+        const initReg = {
+          initialRegion: {
+            latitude: position.coords.latitude - 0.02,
+            longitude: position.coords.longitude,
+            latitudeDelta: 0.115,
+            longitudeDelta: 0.1121,
+          },
+          geoLocationSwitch: true,
+        };
+
+        console.log('dispatch is getting ran');
+        dispatch({ type: 'SET_SPOTS', payload: data.getSpots });
+        dispatch({ type: 'SET_INIT_LOCATION', payload: initReg });
+      });
     }
-  }, [data]);
+
+    setAnimatorListener();
+  }, [
+    data,
+    refreshMarkers,
+    setAnimatorListener,
+    state.animation,
+    state.currentRegion,
+  ]);
 
   // This is the function to scroll
   // to the end of the spots when a new spot is created
@@ -70,26 +64,25 @@ const NewMap = props => {
   //   flatlistRef.getNode().scrollToEnd();
   // }, [flatlistRef, props.route.params]);
 
-  useEffect(() => {
-    // filter to show only spots near initial starting point
-    if (state.updateCounter <= 0) {
-      const area = 0.5;
-      // if (state.initialRegion && state.initialRegion.latitude > 0.1) {
-      //   const filteredSpots = nextProps.user.skate_spots.filter(
-      //     spot =>
-      //       spot.latitude < state.initialRegion.latitude + area &&
-      //       spot.latitude > state.initialRegion.latitude - area &&
-      //       spot.longitude < state.initialRegion.longitude + area &&
-      //       spot.longitude > state.initialRegion.longitude - area &&
-      //       spot.approved === true,
-      //   );
-      //   dispatch({ type: 'SET_SPOTS', payload: filteredSpots });
-      // }
-      // Animate to spot
-      // addAnEventListener();
-      dispatch({ type: 'UPDATE_COUNTER', payload: 1 });
-    }
-  }, [state.updateCounter]);
+  // useEffect(() => {
+  //   // filter to show only spots near initial starting point
+  //   if (state.updateCounter <= 0) {
+  //     const area = 0.5;
+  //     if (state.initialRegion && state.initialRegion.latitude > 0.1) {
+  //       const spotsThatHaveBeenFiltered = state.filteredSpots.filter(
+  //         spot =>
+  //           spot.latitude < state.initialRegion.latitude + area &&
+  //           spot.latitude > state.initialRegion.latitude - area &&
+  //           spot.longitude < state.initialRegion.longitude + area &&
+  //           spot.longitude > state.initialRegion.longitude - area &&
+  //           spot.approved === true,
+  //       );
+  //     }
+  //     // Animate to spot
+  //     // addAnEventListener();
+  //     dispatch({ type: 'UPDATE_COUNTER', payload: 1 });
+  //   }
+  // }, [state.filteredSpots, state.initialRegion, state.updateCounter]);
 
   const onRegionChange = region => {
     dispatch({ type: 'SET_CURRENT_REGION', payload: region });
@@ -103,29 +96,28 @@ const NewMap = props => {
     flatListRef.current.getNode().scrollToIndex({ index });
   };
 
-  const refreshMarkers = () => {
+  const refreshMarkers = useCallback(() => {
     state.animation.removeAllListeners();
-
-    const area = 0.05;
-    if (
-      state.currentRegion &&
-      state.currentRegion.latitude > 0.1 &&
-      data.getSpots !== undefined
-    ) {
-      // console.log(state.currentRegion.latitude, state.currentRegion.longitude);
-      const filteredSpots = data.getSpots.filter(
-        spot =>
-          spot.location.latitude < state.currentRegion.latitude + area &&
-          spot.location.latitude > state.currentRegion.latitude - area &&
-          spot.location.longitude < state.currentRegion.longitude + area &&
-          spot.location.longitude > state.currentRegion.longitude - area,
-        // spot.approved === true,
-      );
-      // setState({filteredSpots: filteredSpots})
-      dispatch({ type: 'SET_SPOTS', payload: filteredSpots });
+    if (data) {
+      const area = 0.05;
+      if (
+        state.currentRegion &&
+        state.currentRegion.latitude > 0.1 &&
+        data.getSpots !== undefined
+      ) {
+        const filteredSpots = data.getSpots.filter(
+          spot =>
+            spot.location.latitude < state.currentRegion.latitude + area &&
+            spot.location.latitude > state.currentRegion.latitude - area &&
+            spot.location.longitude < state.currentRegion.longitude + area &&
+            spot.location.longitude > state.currentRegion.longitude - area,
+          // spot.approved === true,
+        );
+        // setState({filteredSpots: filteredSpots})
+        dispatch({ type: 'SET_SPOTS', payload: filteredSpots });
+      }
     }
-    // setAnimatorListener();
-  };
+  }, [data, state.animation, state.currentRegion]);
 
   const setAnimatorListener = useCallback(() => {
     let regionTimeout = '';
@@ -145,7 +137,8 @@ const NewMap = props => {
           state.index = animationIndex;
           mapRef.current.animateToRegion(
             {
-              latitude: state.filteredSpots[animationIndex].location.latitude,
+              latitude:
+                state.filteredSpots[animationIndex].location.latitude - 0.02,
               longitude: state.filteredSpots[animationIndex].location.longitude,
               latitudeDelta: state.region.latitudeDelta,
               longitudeDelta: state.region.longitudeDelta,
@@ -194,6 +187,8 @@ const NewMap = props => {
   if (error) {
     return <Text>Error! {error.message}</Text>;
   }
+
+  console.log(state.filteredSpots);
 
   return (
     <View style={styles.container}>
@@ -387,4 +382,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NewMap;
+export default Map;

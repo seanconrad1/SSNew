@@ -18,9 +18,7 @@ import BookmarkButton from '../components/BookmarkButton';
 const CARD_WIDTH = wp('95%');
 
 const MapSpotCard = ({ spot }) => {
-  const goToSpotPage = () => {
-    console.log('test');
-  };
+  const goToSpotPage = () => {};
   return (
     <TouchableWithoutFeedback onPress={goToSpotPage}>
       <View style={styles.card}>

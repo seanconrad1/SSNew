@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  AsyncStorage,
 } from 'react-native';
 import {
   Header,
@@ -35,7 +36,17 @@ import RNFS from 'react-native-fs';
 const NewSpotPage = props => {
   const [state, dispatch] = useReducer(reducer, newSpotState);
   const [createSpot, { data }] = useMutation(NEW_SPOT_MUTATION);
+  const [user_id, setUserID] = useState();
   const globalState = useContext(store);
+
+  useEffect(() => {
+    const getID = async () => {
+      const id = await AsyncStorage.getItem('USER_ID');
+      setUserID(id);
+    };
+
+    getID();
+  }, []);
 
   // let latitude;
   // let longitude;
@@ -93,8 +104,6 @@ const NewSpotPage = props => {
 
   const getPhotoFromCameraRoll = () => {
     ImagePicker.showImagePicker(response => {
-      console.log('Response = ', response);
-
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {

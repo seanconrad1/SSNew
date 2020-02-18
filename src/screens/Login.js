@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -24,58 +24,53 @@ const FONT_SIZE_BIG = hp('8');
 const FONT_SIZE_SMALL = hp('6');
 
 const Login = props => {
-  const [email, setEmail] = useState(__DEV__ ? TEST_USERNAME : '');
-  const [password, setPassword] = useState(__DEV__ ? TEST_PASSWORD : '');
-  const globalState = useContext(store);
-  const { dispatch } = globalState;
+  const [email, setEmail] = useState(__DEV__ ? '' : '');
+  const [password, setPassword] = useState(__DEV__ ? '' : '');
   const [disableButton, setDisableButton] = useState(false);
   const [errors, setErrors] = useState([]);
 
   const [login] = useMutation(LOGIN_MUTATION);
 
   useEffect(() => {
-    if (globalState.state.authorized) {
-      props.navigation.navigate('NavDrawer', { screen: 'Map' });
-    }
-  });
+    const checkAuth = async () => {
+      const value = await AsyncStorage.getItem('AUTH_TOKEN');
+      if (value) {
+        props.navigation.navigate('NavDrawer', { screen: 'Map' });
+      }
+    };
+    checkAuth();
+  }, [onSubmit, props.navigation]);
 
-  const onSubmit = async () => {
+  const onSubmit = useCallback(async () => {
     let response;
     setDisableButton(true);
     try {
       response = await login({ variables: { email, password } });
       setDisableButton(false);
     } catch (e) {
-      console.log(e.networkError.response.status);
-      console.log(e.networkError.response.statusText);
-      console.log(e.networkError.result.errors);
       setErrors(e.networkError.result.errors);
       setDisableButton(false);
     }
 
-    dispatch({
-      type: 'set user',
-      obj: {
-        name: response.data.login.name,
-        email: response.data.login.email,
-        user_id: response.data.login.user_id,
-        token: response.data.login.token,
-        authorized: true,
-      },
-    });
-
     if (response.data.login.token) {
       try {
         await AsyncStorage.setItem('AUTH_TOKEN', response.data.login.token);
+        await AsyncStorage.setItem('EMAIL', response.data.login.email);
+        await AsyncStorage.setItem('USER_ID', response.data.login.user_id);
+        await AsyncStorage.setItem('NAME', response.data.login.name);
         setDisableButton(false);
       } catch (e) {
-        // Alert('test');
-        console.log('ERROR: line 67 login', e);
         setDisableButton(false);
       }
     }
+    const id = await AsyncStorage.getItem('USER_ID');
+
+    console.log('ID!', id);
+
+    props.navigation.navigate('NavDrawer', { screen: 'Map' });
+
     setDisableButton(false);
-  };
+  }, [email, login, password, props.navigation]);
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">

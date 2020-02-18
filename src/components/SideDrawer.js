@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, AsyncStorage } from 'react-native';
 import { Divider, ListItem } from 'react-native-elements';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 
@@ -39,8 +39,8 @@ const styles = StyleSheet.create({
 });
 
 const SideMenu = props => {
-  const logOut = () => {
-    console.log('getting here');
+  const logOut = async () => {
+    await AsyncStorage.setItem('AUTHORIZED', 'false');
     props.navigation.navigate('Login');
   };
 

@@ -10,8 +10,6 @@ const getLocation = () => {
       latitudeDelta: 0.115,
       longitudeDelta: 0.1121,
     };
-
-    console.log(initReg.initialRegion);
   });
   return initReg;
 };

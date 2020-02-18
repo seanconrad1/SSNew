@@ -14,7 +14,9 @@ const SignUp = props => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const globalState = useContext(store);
+  const [disableButton, setDisableButton] = useState(false);
   const { dispatch } = globalState;
+  const [errors, setErrors] = useState([]);
 
   const [
     createUser,
@@ -33,6 +35,8 @@ const SignUp = props => {
 
     try {
       data = await createUser({ variables: obj });
+      setErrors(e.networkError.result.errors);
+      setDisableButton(false);
     } catch (e) {
       setError(e);
     }
@@ -61,6 +65,14 @@ const SignUp = props => {
       props.navigation.navigate('NavDrawer', { screen: 'Map' });
     }
   };
+
+  {
+    errors.length > 0 && (
+      <View>
+        <Text style={styles.errors}>{errors[0].message}</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
