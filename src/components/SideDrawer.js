@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
 
 const SideMenu = props => {
   const logOut = async () => {
-    await AsyncStorage.setItem('AUTHORIZED', 'false');
+    await AsyncStorage.setItem('AUTH_TOKEN', '');
     props.navigation.navigate('Login');
   };
 

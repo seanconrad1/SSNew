@@ -85,6 +85,7 @@ const SignUp = props => {
         leftIcon={<Icon name="user" size={24} color="black" />}
         clearButtonMode="never"
         value={name}
+        placeholderTextColor={'grey'}
         autoCapitalize="none"
         autoCorrect={false}
         autoFocus
@@ -98,6 +99,7 @@ const SignUp = props => {
         leftIcon={<Icon name="user" size={24} color="black" />}
         clearButtonMode="never"
         value={email}
+        placeholderTextColor={'grey'}
         autoCapitalize="none"
         autoCorrect={false}
         autoFocus
@@ -110,6 +112,7 @@ const SignUp = props => {
         placeholder="Password"
         autoCapitalize="none"
         autoCorrect={false}
+        placeholderTextColor={'grey'}
         value={password}
         clearButtonMode="never"
         secureTextEntry
@@ -122,6 +125,7 @@ const SignUp = props => {
         placeholder="Confirm password"
         autoCapitalize="none"
         value={confirmPassword}
+        placeholderTextColor={'grey'}
         autoCorrect={false}
         clearButtonMode="never"
         secureTextEntry

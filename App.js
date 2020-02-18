@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 // import {GRAPHQL_URL} from 'react-native-dotenv';
 
 //Components

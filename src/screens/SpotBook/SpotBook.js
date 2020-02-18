@@ -7,8 +7,8 @@ import {
   TextInput,
   Alert,
   RefreshControl,
-  AsyncStorage,
 } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import { Header } from 'react-native-elements';
 import {
   widthPercentageToDP as wp,
@@ -30,6 +30,7 @@ const SpotBook = props => {
   const [state, dispatch] = useReducer(reducer, spotBookState);
   const [deleteSpot] = useMutation(DELETE_SPOT_MUTATION);
   const [deleteBookmark] = useMutation(DELETE_BOOKMARK_MUTATION);
+
   const [user_id, setUserID] = useState();
 
   useEffect(() => {
@@ -37,7 +38,6 @@ const SpotBook = props => {
       const id = await AsyncStorage.getItem('USER_ID');
       setUserID(id);
     };
-
     getID();
   }, []);
 
@@ -57,7 +57,7 @@ const SpotBook = props => {
   });
   const [tab, setTab] = useState(0);
   const [term, setTerm] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing] = useState(false);
 
   useEffect(() => {
     if (!loading && !error) {
@@ -161,7 +161,6 @@ const SpotBook = props => {
     }
     if (tab === 1) {
       console.log('REFETCH 2');
-
       refetch2();
     }
   };
@@ -233,15 +232,5 @@ const styles = StyleSheet.create({
     height: hp('5%'),
     marginBottom: '1%',
     fontSize: 20,
-  },
-  unBookmarkButton: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    height: hp('5.5'),
-    width: wp('30%'),
-    marginLeft: 0,
-    marginRight: 0,
-    marginBottom: 0,
-    padding: 0,
   },
 });

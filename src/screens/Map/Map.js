@@ -43,7 +43,6 @@ const Map = props => {
           geoLocationSwitch: true,
         };
 
-        console.log('dispatch is getting ran');
         dispatch({ type: 'SET_SPOTS', payload: data.getSpots });
         dispatch({ type: 'SET_INIT_LOCATION', payload: initReg });
       });
@@ -187,8 +186,6 @@ const Map = props => {
   if (error) {
     return <Text>Error! {error.message}</Text>;
   }
-
-  console.log(state.filteredSpots);
 
   return (
     <View style={styles.container}>

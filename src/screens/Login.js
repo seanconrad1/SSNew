@@ -63,9 +63,6 @@ const Login = props => {
         setDisableButton(false);
       }
     }
-    const id = await AsyncStorage.getItem('USER_ID');
-
-    console.log('ID!', id);
 
     props.navigation.navigate('NavDrawer', { screen: 'Map' });
 
@@ -87,9 +84,9 @@ const Login = props => {
 
       <Input
         leftIconContainerStyle={styles.iconPadding}
+        placeholderTextColor={'grey'}
         placeholder="Email"
         leftIcon={<Icon name="user" size={24} color="black" />}
-        inputContainerStyle={{}}
         clearButtonMode="never"
         autoCapitalize="none"
         autoCorrect={false}
@@ -102,6 +99,7 @@ const Login = props => {
       <Input
         leftIconContainerStyle={styles.iconPadding}
         returnKeyType="go"
+        placeholderTextColor={'grey'}
         onSubmitEditing={onSubmit}
         value={password}
         placeholder="Password"

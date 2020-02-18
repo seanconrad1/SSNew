@@ -32,7 +32,7 @@ const Navigation = props => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName="NavDrawer"
         screenOptions={{
           headerShown: false,
         }}>

@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { TouchableOpacity, AsyncStorage } from 'react-native';
+import { TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
+
 import { useMutation, useQuery } from '@apollo/react-hooks';
 import { Icon } from 'react-native-elements';
 import {
@@ -18,13 +20,12 @@ const BookmarkButton = ({ spot }) => {
   useEffect(() => {
     const getID = async () => {
       const id = await AsyncStorage.getItem('USER_ID');
+
       setUserID(id);
     };
 
     getID();
   }, []);
-
-  console.log(user_id);
 
   const {
     loading: loading2,
@@ -57,12 +58,10 @@ const BookmarkButton = ({ spot }) => {
   });
 
   useEffect(() => {
-    console.log('useEffect running');
     checkIfUserBookmarkedSpot();
-  }, [checkIfUserBookmarkedSpot, bookmarks]);
+  }, [checkIfUserBookmarkedSpot]);
 
   const checkIfUserBookmarkedSpot = useCallback(() => {
-    console.log('CHECKING!');
     if (bookmarks && !loading2) {
       const isBookmarked = bookmarks.getUser.bookmarks.find(
         bmark => bmark._id === spot._id,
@@ -85,9 +84,6 @@ const BookmarkButton = ({ spot }) => {
     await deleteBookmark();
     checkIfUserBookmarkedSpot();
   };
-  if (bookmarks) {
-    console.log('MY BOOKMARKS:', bookmarks.getUser.bookmarks);
-  }
 
   return (
     <TouchableOpacity style={{ position: 'absolute', zIndex: 1 }}>
