@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import { useMutation, useQuery } from '@apollo/react-hooks';
@@ -43,7 +43,9 @@ const BookmarkButton = ({ spot }) => {
         spot_id: spot._id,
       },
     },
+
     onCompleted: refetch,
+    notifyOnNetworkStatusChange: true,
     awaitRefetchQueries: true,
   });
   const [deleteBookmark] = useMutation(DELETE_BOOKMARK_MUTATION, {
@@ -62,6 +64,7 @@ const BookmarkButton = ({ spot }) => {
   }, [checkIfUserBookmarkedSpot]);
 
   const checkIfUserBookmarkedSpot = useCallback(() => {
+    console.log('CHECKIGN!');
     if (bookmarks && !loading2) {
       const isBookmarked = bookmarks.getUser.bookmarks.find(
         bmark => bmark._id === spot._id,
@@ -76,7 +79,13 @@ const BookmarkButton = ({ spot }) => {
   }, [bookmarks, loading2, spot._id]);
 
   const bookmarkSpot = async () => {
-    await createBookmark();
+    let response;
+    try {
+      response = await createBookmark();
+    } catch (e) {
+      console.log(e);
+      console.log(response);
+    }
     checkIfUserBookmarkedSpot();
   };
 

@@ -1,8 +1,4 @@
 import React from 'react';
-// import {GRAPHQL_URL} from 'react-native-dotenv';
-
-//Components
-//Apollo
 import AsyncStorage from '@react-native-community/async-storage';
 import { ApolloClient } from 'apollo-client';
 import { ApolloProvider } from '@apollo/react-hooks';
@@ -11,14 +7,12 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
 import { HttpLink } from 'apollo-link-http';
 import unfetch from 'unfetch';
-import Navigation from './src/navigation';
+import RootStackScreen from './src/navigation';
 import { StateProvider } from './store';
 import { enableScreens } from 'react-native-screens';
 import { LIVE_GRAPHQL_URL, LOCAL_GRAPHQL_URL } from 'react-native-dotenv';
 
 enableScreens();
-
-// Create the client as outlined in the setup guide
 
 const cache = new InMemoryCache();
 const httpLink = new HttpLink({
@@ -89,7 +83,7 @@ const App = () => {
   return (
     <ApolloProvider client={client}>
       <StateProvider>
-        <Navigation />
+        <RootStackScreen getAuthToken={getAuthToken} />
       </StateProvider>
     </ApolloProvider>
   );

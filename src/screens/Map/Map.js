@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 // import { TouchableOpacity } from 'react-native-gesture-handler';
 import MapView, { Callout } from 'react-native-maps';
@@ -21,6 +22,7 @@ import markerIcon from '../../../assets/markerIcon.png';
 import { animateToUserLocation, addAnEventListener } from './utils';
 import { reducer, mapState } from './reducer';
 import MapSpotCard from '../../components/MapSpotCard';
+import AsyncStorage from '@react-native-community/async-storage';
 
 const CARD_WIDTH = wp('95%');
 
@@ -56,6 +58,15 @@ const Map = props => {
     state.animation,
     state.currentRegion,
   ]);
+
+  useEffect(() => {
+    async function checkAuth() {
+      const user_id = await AsyncStorage.getItem('AUTH_TOKEN');
+      props.navigation.navigate('Login');
+    }
+
+    checkAuth();
+  });
 
   // This is the function to scroll
   // to the end of the spots when a new spot is created

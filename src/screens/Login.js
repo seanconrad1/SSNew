@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useState, useContext, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -23,24 +23,14 @@ import { TEST_USERNAME, TEST_PASSWORD } from 'react-native-dotenv';
 const FONT_SIZE_BIG = hp('8');
 const FONT_SIZE_SMALL = hp('6');
 
-const Login = props => {
-  const [email, setEmail] = useState(__DEV__ ? '' : '');
-  const [password, setPassword] = useState(__DEV__ ? '' : '');
+const Login = ({ navigation }) => {
+  const [email, setEmail] = useState(__DEV__ ? TEST_USERNAME : '');
+  const [password, setPassword] = useState(__DEV__ ? TEST_PASSWORD : '');
   const [disableButton, setDisableButton] = useState(false);
   const [errors, setErrors] = useState([]);
+  const { state, dispatch } = useContext(store);
 
   const [login] = useMutation(LOGIN_MUTATION);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const value = await AsyncStorage.getItem('AUTH_TOKEN');
-      if (value) {
-        props.navigation.navigate('NavDrawer', { screen: 'Map' });
-      }
-    };
-    checkAuth();
-  }, [onSubmit, props.navigation]);
-
   const onSubmit = useCallback(async () => {
     let response;
     setDisableButton(true);
@@ -48,6 +38,8 @@ const Login = props => {
       response = await login({ variables: { email, password } });
       setDisableButton(false);
     } catch (e) {
+      console.log(e.graphQLErrors);
+      console.log(e.message);
       setErrors(e.networkError.result.errors);
       setDisableButton(false);
     }
@@ -58,16 +50,18 @@ const Login = props => {
         await AsyncStorage.setItem('EMAIL', response.data.login.email);
         await AsyncStorage.setItem('USER_ID', response.data.login.user_id);
         await AsyncStorage.setItem('NAME', response.data.login.name);
+        dispatch({
+          type: 'SET_USER',
+          payload: response.data.login.token,
+        });
         setDisableButton(false);
       } catch (e) {
         setDisableButton(false);
       }
     }
 
-    props.navigation.navigate('NavDrawer', { screen: 'Map' });
-
     setDisableButton(false);
-  }, [email, login, password, props.navigation]);
+  }, [dispatch, email, login, password]);
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
@@ -124,7 +118,7 @@ const Login = props => {
         icon={<Icon name="arrow-right" size={15} color="white" />}
         title="Sign Up"
         buttonStyle={styles.signupButton}
-        onPress={() => props.navigation.navigate('SignUp')}
+        onPress={() => navigation.navigate('SignUp')}
       />
     </KeyboardAvoidingView>
   );
