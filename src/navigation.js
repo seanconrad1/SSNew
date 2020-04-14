@@ -1,7 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer, StackRouter } from '@react-navigation/native';
+import AsyncStorage from '@react-native-community/async-storage';
 import SignUp from './screens/SignUp';
 import Login from './screens/Login';
 import Map from './screens/Map/Map';
@@ -10,8 +11,7 @@ import SpotBook from './screens/SpotBook/SpotBook';
 import NewSpotPage from './screens/NewSpotPage/NewSpotPage';
 import LocationSelectorMap from './screens/NewSpotPage/LocationSelectorMap';
 import Approvals from './screens/Approvals';
-import AsyncStorage from '@react-native-community/async-storage';
-import { store } from '../store';
+import { store, SET_TOKEN } from '../store';
 
 const Drawer = createDrawerNavigator();
 const AuthStack = createNativeStackNavigator();
@@ -45,15 +45,33 @@ const AuthStackScreen = () => (
 const RootStack = createNativeStackNavigator();
 const RootStackScreen = ({ getAuthToken }) => {
   const { state, dispatch } = useContext(store);
-  console.log(state.token);
-  let jwt;
-  (async () => {
-    jwt = await getAuthToken();
-  })().catch(err => {
-    console.error(err);
-  });
+
+  // console.log(state.token);
+  // let jwt;
+  // (async () => {
+  //   jwt = await getAuthToken();
+  // })().catch(err => {
+  //   console.error(err);
+  // });
 
   // console.log(jwt);
+
+  useEffect(() => {
+    const bootstrapAsync = async () => {
+      try {
+        const token = await AsyncStorage.getItem('AUTH_TOKEN');
+
+        if (token != null) {
+          dispatch({ type: SET_TOKEN, payload: token });
+        }
+      } catch (e) {
+        console.error(`userTokenFetchErr: ${e}`);
+      }
+    };
+
+    bootstrapAsync();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <NavigationContainer>
